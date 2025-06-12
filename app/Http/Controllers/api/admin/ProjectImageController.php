@@ -53,65 +53,6 @@ class ProjectImageController extends Controller
         ], 201);
     }
 
-// public function updateProjectImage(Request $request, $id)
-// {
-//     try {
-//         $projectImage = ProjectImage::findOrFail($id);
-
-//         try {
-//             $request->validate([
-//                 'project_id' => 'sometimes|exists:projects,id',
-//                 'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-//             ]);
-//         } catch (ValidationException $e) {
-//             return response()->json(['errors' => $e->errors()], 422);
-//         }
-
-//         Log::info('All input:', $request->all());
-//         Log::info('project_id present:', ['filled' => $request->filled('project_id')]);
-//         Log::info('Has file image:', ['hasFile' => $request->hasFile('image')]);
-
-//         $updated = false;
-
-//         if ($request->filled('project_id')) {
-//             $projectImage->project_id = $request->project_id;
-//             $updated = true;
-//         }
-
-//         if ($request->hasFile('image')) {
-//             if (!empty($projectImage->image)) {
-//                 $oldPath = 'public/' . $projectImage->image;
-//                 if (Storage::exists($oldPath)) {
-//                     Storage::delete($oldPath);
-//                 }
-//             }
-
-//             $file = $request->file('image');
-//             $extension = $file->getClientOriginalExtension();
-//             $fileName = Str::slug('project-image-' . time()) . '.' . $extension;
-//             $file->storeAs('public/project_images', $fileName);
-//             $projectImage->image = 'project_images/' . $fileName;
-//             $updated = true;
-//         }
-
-//         if (!$updated) {
-//             return response()->json(['error' => 'No data provided to update'], 422);
-//         }
-
-//         $projectImage->save();
-
-//         return response()->json([
-//             'message' => 'Image updated successfully.',
-//             'data' => $projectImage,
-//             'image_url' => asset('storage/' . $projectImage->image),
-//         ]);
-//     } catch (ModelNotFoundException $e) {
-//         return response()->json(['error' => 'Project image not found'], 404);
-//     } catch (\Exception $e) {
-//         Log::error('Update project image error: ' . $e->getMessage());
-//         return response()->json(['error' => 'Internal Server Error'], 500);
-//     }
-// }
 public function updateProjectImage(Request $request, $id)
     {
         $user = $request->user();
@@ -139,8 +80,7 @@ public function updateProjectImage(Request $request, $id)
             $file = $request->file('image');
             $extension = $file->getClientOriginalExtension();
             $fileName = Str::slug('project-image-' . time()) . '.' . $extension;
-            $filePath = $file->storeAs('project_images', $fileName, 'public'); // This line was already correct
-            // $filePath = 'project_images/' . $fileName; // This line is not needed if storeAs returns the full relative path
+            $filePath = $file->storeAs('project_images', $fileName, 'public');
 
             $projectImage->image_path = $filePath;
         }
