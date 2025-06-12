@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\admin\AdminAuthController;
+use App\Http\Controllers\api\admin\EducationController;
 use App\Http\Controllers\api\admin\ProjectController;
 use App\Http\Controllers\api\admin\ProjectImageController;
 use App\Http\Controllers\api\admin\SkillController;
@@ -26,4 +27,9 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('viewskills', [SkillController::class, 'viewAllSkills'])->name('admin.viewskills');
     Route::put('updateskill/{id}', [SkillController::class, 'updateSkill'])->name('admin.updateskill');
     Route::delete('deleteskill/{id}', [SkillController::class, 'deleteSkill'])->name('admin.deleteskill');
+    Route::post('addeducation', [EducationController::class, 'storeEducation'])->name('admin.addeducation');
+    Route::get('vieweducations', [EducationController::class, 'viewAllEducations'])->name('admin.vieweducations');
+    Route::put('updateeducation/{id}', [EducationController::class, 'updateEducation'])->name('admin.updateeducation');
+    Route::delete('deleteeducation/{id}', [EducationController::class, 'deleteEducation'])->name('admin.deleteeducation');
+    Route::get('vieweducation/{id}', [EducationController::class, 'viewEducation'])->name('admin.vieweducation');
 });
