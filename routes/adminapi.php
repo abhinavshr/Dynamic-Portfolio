@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\api\admin\AdminAuthController;
 use App\Http\Controllers\api\admin\EducationController;
+use App\Http\Controllers\api\admin\ExperienceController;
 use App\Http\Controllers\api\admin\ProjectController;
 use App\Http\Controllers\api\admin\ProjectImageController;
 use App\Http\Controllers\api\admin\SkillController;
@@ -33,3 +34,12 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::delete('deleteeducation/{id}', [EducationController::class, 'deleteEducation'])->name('admin.deleteeducation');
     Route::get('vieweducation/{id}', [EducationController::class, 'viewEducation'])->name('admin.vieweducation');
 });
+
+Route::prefix('admin')->middleware('auth:admin')->group(function () {
+    Route::post('addexperience', [ExperienceController::class, 'storeExperience'])->name('admin.addexperience');
+    Route::get('viewexperiences', [ExperienceController::class, 'viewAllExperiences'])->name('admin.viewexperiences');
+    Route::put('updateexperience/{id}', [ExperienceController::class, 'updateExperience'])->name('admin.updateexperience');
+    Route::delete('deleteexperience/{id}', [ExperienceController::class, 'deleteExperience'])->name('admin.deleteexperience');
+    Route::get('viewonebyoneexperience/{id}', [ExperienceController::class, 'viewOneByOneExperience'])->name('admin.viewonebyoneexperience');
+});
+
