@@ -3,6 +3,7 @@
 use App\Http\Controllers\api\admin\AdminAuthController;
 use App\Http\Controllers\api\admin\ProjectController;
 use App\Http\Controllers\api\admin\ProjectImageController;
+use App\Http\Controllers\api\admin\SkillController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -21,4 +22,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('viewprojectimages', [ProjectImageController::class, 'projectImageView'])->name('admin.viewprojectimages');
     Route::post('updateprojectimage/{id}', [ProjectImageController::class, 'updateProjectImage'])->name('admin.updateprojectimage');
     Route::delete('deleteprojectimage/{id}', [ProjectImageController::class, 'deleteProjectImage'])->name('admin.deleteprojectimage');
+    Route::post('addskill', [SkillController::class, 'storeSkill'])->name('admin.addskill');
+    Route::get('viewskills', [SkillController::class, 'viewAllSkills'])->name('admin.viewskills');
+    Route::put('updateskill/{id}', [SkillController::class, 'updateSkill'])->name('admin.updateskill');
+    Route::delete('deleteskill/{id}', [SkillController::class, 'deleteSkill'])->name('admin.deleteskill');
 });
