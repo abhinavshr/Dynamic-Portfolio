@@ -27,7 +27,7 @@ class CertificateController extends Controller
             'title' => 'required|string|max:255',
             'issuer' => 'required|string|max:255',
             'issue_date' => 'required|date_format:Y-m-d',
-            'certificate_photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'certificate_photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg,pdf',
         ]);
 
         if ($request->hasFile('certificate_photo')) {

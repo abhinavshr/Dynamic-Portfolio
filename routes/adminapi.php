@@ -7,6 +7,7 @@ use App\Http\Controllers\api\admin\ExperienceController;
 use App\Http\Controllers\api\admin\ProjectController;
 use App\Http\Controllers\api\admin\ProjectImageController;
 use App\Http\Controllers\api\admin\SkillController;
+use App\Http\Controllers\api\admin\SoftSkillController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -50,4 +51,12 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('viewonebyonecertificate/{id}', [CertificateController::class, 'viewOneByOneCertificate'])->name('admin.viewonebyonecertificate');
     Route::post('updatecertificate/{id}', [CertificateController::class, 'updateCertificate'])->name('admin.updatecertificate');
     Route::delete('deletecertificate/{id}', [CertificateController::class, 'deleteCertificate'])->name('admin.deletecertificate');
+});
+
+Route::prefix('admin')->middleware('auth:admin')->group(function () {
+    Route::post('addsoftskill', [SoftSkillController::class, 'storeSoftSkill'])->name('admin.addsoftskill');
+    Route::get('viewsoftskills', [SoftSkillController::class, 'viewAllSoftSkill'])->name('admin.viewsoftskills');
+    Route::get('viewonebyonesoftskill/{id}', [SoftSkillController::class, 'viewOneByOneSoftSkill'])->name('admin.viewonebyonesoftskill');
+    Route::put('updatesoftskill/{id}', [SoftSkillController::class, 'updateSoftSkill'])->name('admin.updatesoftskill');
+    Route::delete('deletesoftskill/{id}', [SoftSkillController::class, 'deleteSoftSkill'])->name('admin.deletesoftskill');
 });
