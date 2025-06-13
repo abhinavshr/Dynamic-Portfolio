@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\admin\AdminAuthController;
+use App\Http\Controllers\api\admin\CertificateController;
 use App\Http\Controllers\api\admin\EducationController;
 use App\Http\Controllers\api\admin\ExperienceController;
 use App\Http\Controllers\api\admin\ProjectController;
@@ -43,3 +44,10 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('viewonebyoneexperience/{id}', [ExperienceController::class, 'viewOneByOneExperience'])->name('admin.viewonebyoneexperience');
 });
 
+Route::prefix('admin')->middleware('auth:admin')->group(function () {
+    Route::post('addcertificate', [CertificateController::class, 'storeCertificate'])->name('admin.addcertificate');
+    Route::get('viewcertificates', [CertificateController::class, 'viewAllCertificates'])->name('admin.viewcertificates');
+    Route::get('viewonebyonecertificate/{id}', [CertificateController::class, 'viewOneByOneCertificate'])->name('admin.viewonebyonecertificate');
+    Route::post('updatecertificate/{id}', [CertificateController::class, 'updateCertificate'])->name('admin.updatecertificate');
+    Route::delete('deletecertificate/{id}', [CertificateController::class, 'deleteCertificate'])->name('admin.deletecertificate');
+});
