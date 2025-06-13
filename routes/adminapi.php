@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\api\admin\AdminAuthController;
 use App\Http\Controllers\api\admin\CertificateController;
+use App\Http\Controllers\api\admin\ContactController;
 use App\Http\Controllers\api\admin\EducationController;
 use App\Http\Controllers\api\admin\ExperienceController;
 use App\Http\Controllers\api\admin\ProjectController;
@@ -59,4 +60,9 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('viewonebyonesoftskill/{id}', [SoftSkillController::class, 'viewOneByOneSoftSkill'])->name('admin.viewonebyonesoftskill');
     Route::put('updatesoftskill/{id}', [SoftSkillController::class, 'updateSoftSkill'])->name('admin.updatesoftskill');
     Route::delete('deletesoftskill/{id}', [SoftSkillController::class, 'deleteSoftSkill'])->name('admin.deletesoftskill');
+});
+
+Route::prefix('admin')->middleware('auth:admin')->group(function () {
+    Route::get('viewcontact', [ContactController::class, 'viewAllContacts'])->name('admin.viewcontact');
+    Route::get('viewonebyonecontact/{id}', [ContactController::class, 'viewOneContact'])->name('admin.viewonebyonecontact');
 });
