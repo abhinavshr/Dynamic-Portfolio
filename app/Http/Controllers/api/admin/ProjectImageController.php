@@ -5,47 +5,54 @@ namespace App\Http\Controllers\api\admin;
 use App\Http\Controllers\Controller;
 use App\Models\ProjectImage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+/**
+ * Class ProjectImageController
+ * @package App\Http\Controllers\api\admin
+ */
 class ProjectImageController extends Controller
 {
-    public function projectImageView()
+    /**
+     * Middleware to check for admin authentication
+     */
+    public function __construct()
     {
-        return response()->json(ProjectImage::all());
+        $this->middleware('auth:admin');
     }
 
+    /**
+     * View all project images
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function projectImageView()
+    {
+        return response()->json([
+            'message' => 'All project images fetched successfully.',
+            'data' => ProjectImage::all()
+        ]);
+    }
+
+    /**
+     * Add a new project image
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function addProjectImage(Request $request)
     {
-        $user = $request->user();
+        $validated = $this->validateImageRequest($request, true);
 
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+        // Store the image
+        $filePath = $this->storeImage($request->file('image'));
 
-        $request->validate([
-            'project_id' => 'required|exists:projects,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $extension = $file->getClientOriginalExtension();
-            $fileName = Str::slug('project-image-' . time()) . '.' . $extension;
-            $file->storeAs('public/project_images', $fileName);
-            $filePath = 'project_images/' . $fileName;
-        } else {
-            return response()->json(['error' => 'No image file uploaded'], 400);
-        }
-
+        // Create the project image
         $projectImage = ProjectImage::create([
-            'project_id' => $request->project_id,
+            'project_id' => $validated['project_id'],
             'image_path' => $filePath,
         ]);
 
+        // Return the response
         return response()->json([
             'message' => 'Image uploaded successfully',
             'data' => $projectImage,
@@ -53,58 +60,98 @@ class ProjectImageController extends Controller
         ], 201);
     }
 
-public function updateProjectImage(Request $request, $id)
+    /**
+     * Update a project image
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateProjectImage(Request $request, $id)
     {
-        $user = $request->user();
-
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        $request->validate([
-            'project_id' => 'sometimes|exists:projects,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
+        // Find the project image
         $projectImage = ProjectImage::findOrFail($id);
 
-        if ($request->has('project_id')) {
-            $projectImage->project_id = $request->input('project_id');
+        // Validate the request
+        $validated = $this->validateImageRequest($request, false);
+
+        // Update the project image
+        if (isset($validated['project_id'])) {
+            $projectImage->project_id = $validated['project_id'];
         }
 
+        // Update the image if it exists
         if ($request->hasFile('image')) {
-            if ($projectImage->image_path && Storage::disk('public')->exists($projectImage->image_path)) {
-                Storage::disk('public')->delete($projectImage->image_path);
-            }
-
-            $file = $request->file('image');
-            $extension = $file->getClientOriginalExtension();
-            $fileName = Str::slug('project-image-' . time()) . '.' . $extension;
-            $filePath = $file->storeAs('project_images', $fileName, 'public');
-
-            $projectImage->image_path = $filePath;
+            $this->deleteImageIfExists($projectImage->image_path);
+            $projectImage->image_path = $this->storeImage($request->file('image'));
         }
 
+        // Save the project image
         $projectImage->save();
 
+        // Return the response
         return response()->json([
             'message' => 'Project image updated successfully',
             'data' => $projectImage,
             'image_url' => asset('storage/' . $projectImage->image_path),
-        ], 200);
-    }
-    public function deleteProjectImage($id)
-    {
-        $projectImage = ProjectImage::findOrFail($id);
-
-        if ($projectImage->image_path && Storage::disk('public')->exists($projectImage->image_path)) {
-            Storage::disk('public')->delete($projectImage->image_path);
-        }
-
-        $projectImage->delete();
-
-        return response()->json([
-            'message' => 'Image and record deleted successfully.',
         ]);
     }
+
+    /**
+     * Delete a project image
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteProjectImage($id)
+    {
+        // Find the project image
+        $projectImage = ProjectImage::findOrFail($id);
+
+        // Delete the image
+        $this->deleteImageIfExists($projectImage->image_path);
+
+        // Delete the project image
+        $projectImage->delete();
+
+        // Return the response
+        return response()->json([
+            'message' => 'Image and record deleted successfully.'
+        ]);
+    }
+
+    /**
+     * Validate the image request
+     * @param Request $request
+     * @param bool $isCreate
+     * @return array
+     */
+    private function validateImageRequest(Request $request, $isCreate = true)
+    {
+        return $request->validate([
+            'project_id' => $isCreate ? 'required|exists:projects,id' : 'sometimes|exists:projects,id',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+    }
+
+    /**
+     * Store the image
+     * @param $file
+     * @return mixed
+     */
+    private function storeImage($file)
+    {
+        $fileName = Str::slug('project-image-' . time()) . '.' . $file->getClientOriginalExtension();
+        return $file->storeAs('project_images', $fileName, 'public');
+    }
+
+    /**
+     * Delete the image if it exists
+     * @param $path
+     */
+    private function deleteImageIfExists($path)
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
 }
+
