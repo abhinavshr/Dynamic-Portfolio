@@ -8,34 +8,41 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * Class CertificateController
+ * @package App\Http\Controllers\api\admin
+ */
 class CertificateController extends Controller
 {
+    /**
+     * @var string
+     */
+    private $imageStoragePath = 'public/certificates';
 
-    public function _checkLogin(Request $request){
-        $user = $request->user();
-
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+    /**
+     * Constructor to set auth middleware
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function storeCertificate(Request $request)
     {
-        $this->_checkLogin($request);
-
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'issuer' => 'required|string|max:255',
-            'issue_date' => 'required|date_format:Y-m-d',
-            'certificate_photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg,pdf',
-        ]);
+        $validatedData = $this->validateCertificate($request, true);
 
         if ($request->hasFile('certificate_photo')) {
             $file = $request->file('certificate_photo');
             $extension = $file->getClientOriginalExtension();
             $fileName = Str::slug($validatedData['title'] . '-' . time()) . '.' . $extension;
-            $file->storeAs('public/certificates', $fileName);
-            $filePath = 'certificates/' . $fileName;
+            $file->storeAs($this->imageStoragePath, $fileName);
+            $filePath = $this->imageStoragePath . '/' . $fileName;
         } else {
             return response()->json(['error' => 'No image file uploaded'], 400);
         }
@@ -54,10 +61,14 @@ class CertificateController extends Controller
         ], 201);
     }
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function viewAllCertificates(Request $request)
     {
-        $this->_checkLogin($request);
-
         $certificates = Certificate::all();
         return response()->json([
             'message' => 'All Certificates',
@@ -65,10 +76,15 @@ class CertificateController extends Controller
         ]);
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function viewOneByOneCertificate(Request $request, $id)
     {
-        $this->_checkLogin($request);
-
         $certificate = Certificate::findOrFail($id);
         return response()->json([
             'message' => 'Certificate',
@@ -76,16 +92,16 @@ class CertificateController extends Controller
         ]);
     }
 
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function updateCertificate(Request $request, $id)
     {
-        $this->_checkLogin($request);
-
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'issuer' => 'required|string|max:255',
-            'issue_date' => 'required|date_format:Y-m-d',
-            'certificate_photo' => 'nullable|mimes:jpeg,png,jpg,gif,svg,pdf',
-        ]);
+        $validatedData = $this->validateCertificate($request, false);
 
         $certificate = Certificate::find($id);
         if (!$certificate) {
@@ -102,7 +118,7 @@ class CertificateController extends Controller
             $file = $request->file('certificate_photo');
             $extension = $file->getClientOriginalExtension();
             $fileName = Str::slug($validatedData['title'] . '-' . time()) . '.' . $extension;
-            $filePath = $file->storeAs('certificate_photos', $fileName, 'public');
+            $filePath = $file->storeAs($this->imageStoragePath, $fileName, 'public');
 
             $validatedData['certificate_photo'] = $filePath;
         }
@@ -116,15 +132,24 @@ class CertificateController extends Controller
         ]);
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function deleteCertificate(Request $request, $id)
     {
-        $this->_checkLogin($request);
-
         $certificate = Certificate::find($id);
         if (!$certificate) {
             return response()->json([
                 'error' => 'Certificate not found',
             ], 404);
+        }
+
+        if ($certificate->certificate_photo && Storage::disk('public')->exists($certificate->certificate_photo)) {
+            Storage::disk('public')->delete($certificate->certificate_photo);
         }
 
         $certificate->delete();
@@ -133,4 +158,24 @@ class CertificateController extends Controller
             'message' => 'Certificate deleted successfully',
         ]);
     }
+
+    /**
+     * Validate the request data
+     *
+     * @param Request $request
+     * @param bool $isCreate
+     * @return array
+     */
+    private function validateCertificate(Request $request, $isCreate = true)
+    {
+        return $request->validate([
+            'title' => 'required|string|max:255',
+            'issuer' => 'required|string|max:255',
+            'issue_date' => 'required|date_format:Y-m-d',
+            'certificate_photo' => $isCreate
+                ? 'required|image|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048'
+                : 'nullable|image|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048',
+        ]);
+    }
 }
+

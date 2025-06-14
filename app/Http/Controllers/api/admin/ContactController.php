@@ -8,32 +8,43 @@ use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-
-    public function _checkLogin(Request $request){
-        $user = $request->user();
-
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+    // This middleware will check if the request is authenticated with the admin guard
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
     }
 
-    public function viewAllContacts(Request $request){
-
-        $this->_checkLogin($request);
-
+    // This method will return all contacts
+    public function viewAllContacts(Request $request)
+    {
+        // Retrieve all contacts from the database
         $contacts = Contact::all();
-        return response()->json($contacts);
+
+        // Return the contacts in JSON format
+        return response()->json([
+            'message' => 'All contacts retrieved successfully',
+            'data' => $contacts,
+        ]);
     }
 
-    public function viewOneContact(Request $request, $id){
-
-        $this->_checkLogin($request);
-
+    // This method will return a single contact
+    public function viewOneContact(Request $request, $id)
+    {
+        // Retrieve the contact from the database
         $contact = Contact::find($id);
 
+        // If the contact is not found, return a 404 error
         if (!$contact) {
-            return response()->json(['error' => 'Contact not found'], 404);
+            return response()->json([
+                'error' => 'Contact not found',
+            ], 404);
         }
-        return response()->json($contact);
+
+        // Return the contact in JSON format
+        return response()->json([
+            'message' => 'Contact retrieved successfully',
+            'data' => $contact,
+        ]);
     }
 }
+

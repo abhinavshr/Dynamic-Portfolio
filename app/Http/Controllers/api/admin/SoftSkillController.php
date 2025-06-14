@@ -6,93 +6,126 @@ use App\Http\Controllers\Controller;
 use App\Models\SoftSkill;
 use Illuminate\Http\Request;
 
+/**
+ * Class SoftSkillController
+ * @package App\Http\Controllers\api\admin
+ *
+ * This controller handles the requests related to soft skills.
+ * It provides methods to create, retrieve, update and delete a soft skill.
+ */
 class SoftSkillController extends Controller
 {
-
-    public function _checkLogin(Request $request){
-        $user = $request->user();
-
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+    /**
+     * Apply middleware to ensure the user is an authenticated admin.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
     }
 
-
+    /**
+     * Store a new soft skill in storage.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function storeSoftSkill(Request $request)
     {
-        $this->_checkLogin($request);
+        $validated = $this->validateSoftSkill($request);
 
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'level' => 'required|integer',
-        ]);
-
-        $softskill = SoftSkill::create($validatedData);
+        $softskill = SoftSkill::create($validated);
 
         return response()->json([
-            'message' => 'SoftSkill created successfully', 'data' => $softskill
+            'success' => true,
+            'message' => 'Soft skill created successfully.',
+            'data' => $softskill
         ], 201);
     }
 
-    public function viewAllSoftSkill(Request $request)
+    /**
+     * Retrieve all soft skills from storage.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function viewAllSoftSkill()
     {
-        $this->_checkLogin($request);
-
         $softskills = SoftSkill::all();
-        return response()->json($softskills, 200);
-    }
-
-    public function viewOneByOneSoftSkill(Request $request, $id)
-    {
-        $this->_checkLogin($request);
-
-        $softskill = SoftSkill::find($id);
-
-        if (!$softskill) {
-            return response()->json(['error' => 'SoftSkill not found'], 404);
-        }
-
-        return response()->json($softskill, 200);
-    }
-
-    public function updateSoftSkill(Request $request, $id)
-    {
-        $this->_checkLogin($request);
-
-        $softskill = SoftSkill::find($id);
-
-        if (!$softskill) {
-            return response()->json(['error' => 'SoftSkill not found'], 404);
-        }
-
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'level' => 'required|integer',
-        ]);
-
-        $softskill->update($validatedData);
 
         return response()->json([
-            'message' => 'SoftSkill updated successfully', 'data' => $softskill
-        ], 200);
+            'success' => true,
+            'message' => 'Soft skills retrieved successfully.',
+            'data' => $softskills
+        ]);
     }
 
-    public function deleteSoftSkill(Request $request, $id)
+    /**
+     * Retrieve a specific soft skill by ID.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function viewOneByOneSoftSkill($id)
     {
-        $this->_checkLogin($request);
+        $softskill = SoftSkill::findOrFail($id);
 
-        $softskill = SoftSkill::find($id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Soft skill retrieved successfully.',
+            'data' => $softskill
+        ]);
+    }
 
-        if (!$softskill) {
-            return response()->json(['error' => 'SoftSkill not found'], 404);
-        }
+    /**
+     * Update a soft skill in storage.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateSoftSkill(Request $request, $id)
+    {
+        $softskill = SoftSkill::findOrFail($id);
+        $validated = $this->validateSoftSkill($request);
 
+        $softskill->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Soft skill updated successfully.',
+            'data' => $softskill
+        ]);
+    }
+
+    /**
+     * Remove a soft skill from storage.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteSoftSkill($id)
+    {
+        $softskill = SoftSkill::findOrFail($id);
         $softskill->delete();
 
         return response()->json([
-            'message' => 'SoftSkill deleted successfully',
-        ], 200);
+            'success' => true,
+            'message' => 'Soft skill deleted successfully.'
+        ]);
+    }
+
+    /**
+     * Validate the request data for a soft skill.
+     *
+     * @param Request $request
+     * @return array
+     */
+    private function validateSoftSkill(Request $request)
+    {
+        return $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'level' => 'required|integer|min:0|max:100',
+        ]);
     }
 }
+
