@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -26,46 +26,55 @@ class AdminAuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request)
-    {
-        // Check if the singleton admin user already exists.
-        if (User::where('singleton', true)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only one singleton admin user is allowed.'
-            ], 403);
-        }
-
-        // Validate the request data.
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|confirmed|min:6',
-            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        // Store the profile photo.
-        $fileName = null;
-        if ($request->hasFile('profile_photo')) {
-            $extension = $request->file('profile_photo')->getClientOriginalExtension();
-            $fileName = Str::slug($validated['name']) . '-' . time() . '.' . $extension;
-            $request->file('profile_photo')->storePubliclyAs('public/profile', $fileName);
-        }
-
-        // Create the admin user.
-        $admin = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-            'profile_photo' => $fileName,
-            'singleton' => true,
-        ]);
-
+{
+    // Check if singleton admin already exists
+    if (User::where('singleton', true)->exists()) {
         return response()->json([
-            'success' => true,
-            'message' => 'Admin registered successfully.',
-            'data' => $admin
-        ], 201);
+            'success' => false,
+            'message' => 'Only one singleton admin user is allowed.'
+        ], 403);
     }
+
+    // Validate request
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|confirmed|min:6',
+        'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    // Upload image to Cloudinary
+    $profilePhotoUrl = null;
+
+    if ($request->hasFile('profile_photo')) {
+        $uploadResult = Cloudinary::upload(
+            $request->file('profile_photo')->getRealPath(),
+            [
+                'folder' => 'admin_profile',
+                'public_id' => Str::slug($validated['name']) . '-' . time(),
+                'overwrite' => true,
+            ]
+        );
+
+        $profilePhotoUrl = $uploadResult->getSecurePath();
+    }
+
+    // Create admin user
+    $admin = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => bcrypt($validated['password']),
+        'profile_photo' => $profilePhotoUrl,
+        'singleton' => true,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Admin registered successfully.',
+        'data' => $admin
+    ], 201);
+}
+
 
     /**
      * Login an admin user.
