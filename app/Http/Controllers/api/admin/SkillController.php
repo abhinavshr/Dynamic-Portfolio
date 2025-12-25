@@ -1,0 +1,126 @@
+<?php
+
+namespace App\Http\Controllers\api\admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Skill;
+use Illuminate\Http\Request;
+
+/**
+ * Class SkillController
+ * @package App\Http\Controllers\api\admin
+ */
+class SkillController extends Controller
+{
+    /**
+     * Apply middleware for authentication with admin guard.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
+    }
+
+    /**
+     * Store a new skill in storage.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeSkill(Request $request)
+    {
+        // Validate the request data
+        $validated = $this->validateSkill($request);
+
+        // Create a new skill
+        $skill = Skill::create($validated);
+
+        // Return a JSON response with the created skill
+        return response()->json([
+            'success' => true,
+            'message' => 'Skill created successfully.',
+            'data' => $skill,
+        ], 201);
+    }
+
+    /**
+     * Display a listing of all skills.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function viewAllSkills()
+    {
+        // Retrieve all skills from the database
+        $skills = Skill::all();
+
+        // Return a JSON response with the skills
+        return response()->json([
+            'success' => true,
+            'message' => 'Skills retrieved successfully.',
+            'data' => $skills,
+        ]);
+    }
+
+    /**
+     * Update the specified skill in storage.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateSkill(Request $request, $id)
+    {
+        // Retrieve the skill to be updated
+        $skill = Skill::findOrFail($id);
+
+        // Validate the request data
+        $validated = $this->validateSkill($request);
+
+        // Update the skill
+        $skill->update($validated);
+
+        // Return a JSON response with the updated skill
+        return response()->json([
+            'success' => true,
+            'message' => 'Skill updated successfully.',
+            'data' => $skill,
+        ]);
+    }
+
+    /**
+     * Remove the specified skill from storage.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteSkill($id)
+    {
+        // Retrieve the skill to be deleted
+        $skill = Skill::findOrFail($id);
+
+        // Delete the skill
+        $skill->delete();
+
+        // Return a JSON response
+        return response()->json([
+            'success' => true,
+            'message' => 'Skill deleted successfully.',
+        ]);
+    }
+
+    /**
+     * Validate the request data for a skill.
+     *
+     * @param Request $request
+     * @return array
+     */
+    private function validateSkill(Request $request)
+    {
+        // Validate the request data
+        return $request->validate([
+            'name' => 'required|string|max:255',
+            'level' => 'required|integer|min:0|max:100',
+            'category' => 'required|string|max:255',
+        ]);
+    }
+}
+
