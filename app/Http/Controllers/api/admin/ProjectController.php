@@ -70,6 +70,17 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function viewProjectById($id)
+    {
+        // Find the project or fail
+        $project = Project::with('category')->findOrFail($id);
+
+        return response()->json([
+            'message' => 'Project fetched successfully',
+            'project' => $project
+        ]);
+    }
+
     /**
      * Delete an existing project from the database.
      *
@@ -101,7 +112,10 @@ class ProjectController extends Controller
             'tech_stack' => 'required|string|max:255',
             'live_link' => 'nullable|url',
             'github_link' => 'nullable|url',
+            'status' => 'required|in:active,completed,in_progress,on_hold',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
     }
 }
-
