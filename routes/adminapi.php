@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\admin\AdminAuthController;
+use App\Http\Controllers\api\admin\CategoryController;
 use App\Http\Controllers\api\admin\CertificateController;
 use App\Http\Controllers\api\admin\ContactController;
 use App\Http\Controllers\api\admin\EducationController;
@@ -21,6 +22,9 @@ Route::prefix('admin')->group(function () {
 Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     Route::post('logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+
+    // Categories
+     Route::get('categories', [CategoryController::class, 'index'])->name('admin.categories');
 
     // Projects
     Route::post('projects', [ProjectController::class, 'addProject'])->name('admin.addproject');
