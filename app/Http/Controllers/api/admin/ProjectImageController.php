@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\api\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\Models\ProjectImage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -39,24 +40,40 @@ class ProjectImageController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function addProjectImage(Request $request)
+
+    public function storeProjectImage(Request $request)
     {
-        $validated = $this->validateImageRequest($request, true);
-
-        // Store the image
-        $filePath = $this->storeImage($request->file('image'));
-
-        // Create the project image
-        $projectImage = ProjectImage::create([
-            'project_id' => $validated['project_id'],
-            'image_path' => $filePath,
+        $request->validate([
+            'project_id' => 'required|exists:projects,id',
+            'image_name' => 'required|string',
+            'image'      => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
-        // Return the response
+        $project = Project::findOrFail($request->project_id);
+
+        $folder = 'projects';
+
+        $imageName = Str::slug($request->image_name);
+
+        $upload = Cloudinary::upload(
+            $request->file('image')->getRealPath(),
+            [
+                'folder'    => $folder,
+                'public_id' => $imageName,
+                'overwrite' => true,
+            ]
+        );
+
+        $projectImage = ProjectImage::create([
+            'project_id' => $project->id,
+            'image_name' => $imageName,
+            'image_path' => $upload->getSecurePath(),
+        ]);
+
         return response()->json([
-            'message' => 'Image uploaded successfully',
-            'data' => $projectImage,
-            'image_url' => asset('storage/' . $filePath),
+            'success' => true,
+            'message' => 'Image uploaded successfully.',
+            'data'    => $projectImage,
         ], 201);
     }
 
@@ -68,33 +85,40 @@ class ProjectImageController extends Controller
      */
     public function updateProjectImage(Request $request, $id)
     {
-        // Find the project image
+        $request->validate([
+            'image_name' => 'required|string',
+            'image'      => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
+        ]);
+
         $projectImage = ProjectImage::findOrFail($id);
 
-        // Validate the request
-        $validated = $this->validateImageRequest($request, false);
+        $oldPublicId = 'projects/' . $projectImage->image_name;
 
-        // Update the project image
-        if (isset($validated['project_id'])) {
-            $projectImage->project_id = $validated['project_id'];
-        }
+        Cloudinary::destroy($oldPublicId);
 
-        // Update the image if it exists
-        if ($request->hasFile('image')) {
-            $this->deleteImageIfExists($projectImage->image_path);
-            $projectImage->image_path = $this->storeImage($request->file('image'));
-        }
+        $newImageName = Str::slug($request->image_name);
 
-        // Save the project image
-        $projectImage->save();
+        $upload = Cloudinary::upload(
+            $request->file('image')->getRealPath(),
+            [
+                'folder'    => 'projects',
+                'public_id' => $newImageName,
+                'overwrite' => true,
+            ]
+        );
 
-        // Return the response
+        $projectImage->update([
+            'image_name' => $newImageName,
+            'image_path' => $upload->getSecurePath(),
+        ]);
+
         return response()->json([
-            'message' => 'Project image updated successfully',
-            'data' => $projectImage,
-            'image_url' => asset('storage/' . $projectImage->image_path),
+            'success' => true,
+            'message' => 'Image updated successfully.',
+            'data'    => $projectImage,
         ]);
     }
+
 
     /**
      * Delete a project image
@@ -103,55 +127,23 @@ class ProjectImageController extends Controller
      */
     public function deleteProjectImage($id)
     {
-        // Find the project image
-        $projectImage = ProjectImage::findOrFail($id);
+        $projectImage = ProjectImage::with('project')->findOrFail($id);
 
-        // Delete the image
-        $this->deleteImageIfExists($projectImage->image_path);
+        // Build Cloudinary public_id
+        $publicId = 'projects/' .
+            Str::slug($projectImage->project->title) .
+            '/' .
+            $projectImage->image_name;
 
-        // Delete the project image
+        // Delete from Cloudinary
+        Cloudinary::destroy($publicId);
+
+        // Delete DB record
         $projectImage->delete();
 
-        // Return the response
         return response()->json([
-            'message' => 'Image and record deleted successfully.'
+            'success' => true,
+            'message' => 'Image deleted from Cloudinary and database successfully.',
         ]);
-    }
-
-    /**
-     * Validate the image request
-     * @param Request $request
-     * @param bool $isCreate
-     * @return array
-     */
-    private function validateImageRequest(Request $request, $isCreate = true)
-    {
-        return $request->validate([
-            'project_id' => $isCreate ? 'required|exists:projects,id' : 'sometimes|exists:projects,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-    }
-
-    /**
-     * Store the image
-     * @param $file
-     * @return mixed
-     */
-    private function storeImage($file)
-    {
-        $fileName = Str::slug('project-image-' . time()) . '.' . $file->getClientOriginalExtension();
-        return $file->storeAs('project_images', $fileName, 'public');
-    }
-
-    /**
-     * Delete the image if it exists
-     * @param $path
-     */
-    private function deleteImageIfExists($path)
-    {
-        if ($path && Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-        }
     }
 }
-

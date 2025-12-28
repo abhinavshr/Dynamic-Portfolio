@@ -11,10 +11,12 @@ class ProjectImage extends Model
 
     protected $fillable = [
         'project_id',
+        'image_name',
         'image_path',
     ];
 
-    public function project() {
+    public function project()
+    {
         return $this->belongsTo(Project::class);
     }
 }
