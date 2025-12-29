@@ -101,38 +101,46 @@ class ProjectImageController extends Controller
     {
         $request->validate([
             'image_name' => 'required|string',
-            'image'      => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
+            'project_id' => 'required|exists:projects,id',
+            'image'      => 'sometimes|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         $projectImage = ProjectImage::findOrFail($id);
 
-        $oldPublicId = 'projects/' . $projectImage->image_name;
-
-        Cloudinary::destroy($oldPublicId);
-
         $newImageName = Str::slug($request->image_name);
 
-        $upload = Cloudinary::upload(
-            $request->file('image')->getRealPath(),
-            [
-                'folder'    => 'projects',
-                'public_id' => $newImageName,
-                'overwrite' => true,
-            ]
-        );
+        if ($request->hasFile('image')) {
+            $oldPublicId = 'projects/' . $projectImage->image_name;
 
-        $projectImage->update([
-            'image_name' => $newImageName,
-            'image_path' => $upload->getSecurePath(),
-        ]);
+            Cloudinary::destroy($oldPublicId);
+
+            $upload = Cloudinary::upload(
+                $request->file('image')->getRealPath(),
+                [
+                    'folder'    => 'projects',
+                    'public_id' => $newImageName,
+                    'overwrite' => true,
+                ]
+            );
+
+            $projectImage->update([
+                'project_id' => $request->project_id,
+                'image_name' => $newImageName,
+                'image_path' => $upload->getSecurePath(),
+            ]);
+        } else {
+            $projectImage->update([
+                'project_id' => $request->project_id,
+                'image_name' => $newImageName,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Image updated successfully.',
+            'message' => 'Project image updated successfully.',
             'data'    => $projectImage,
         ]);
     }
-
 
     /**
      * Delete a project image
