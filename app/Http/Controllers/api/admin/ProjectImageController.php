@@ -36,6 +36,20 @@ class ProjectImageController extends Controller
     }
 
     /**
+     * Get a project image by ID
+     */
+    public function showProjectImage($id)
+    {
+        $projectImage = ProjectImage::with('project:id,title')->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Project image fetched successfully.',
+            'data'    => $projectImage,
+        ]);
+    }
+
+    /**
      * Add a new project image
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
