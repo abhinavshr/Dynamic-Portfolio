@@ -149,15 +149,10 @@ class ProjectImageController extends Controller
      */
     public function deleteProjectImage($id)
     {
-        $projectImage = ProjectImage::with('project')->findOrFail($id);
+        $projectImage = ProjectImage::findOrFail($id);
 
-        // Build Cloudinary public_id
-        $publicId = 'projects/' .
-            Str::slug($projectImage->project->title) .
-            '/' .
-            $projectImage->image_name;
+        $publicId = 'projects/' . $projectImage->image_name;
 
-        // Delete from Cloudinary
         Cloudinary::destroy($publicId);
 
         // Delete DB record
