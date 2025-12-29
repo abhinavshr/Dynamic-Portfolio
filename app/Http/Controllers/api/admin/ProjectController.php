@@ -51,6 +51,23 @@ class ProjectController extends Controller
     }
 
     /**
+     * Fetch a dropdown list of projects to be used in the frontend.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function projectDropdown()
+    {
+        $projects = Project::select('id', 'title')
+            ->orderBy('title')
+            ->get();
+
+        return response()->json([
+            'message' => 'Projects dropdown fetched successfully',
+            'projects' => $projects
+        ]);
+    }
+
+    /**
      * Update an existing project in the database.
      *
      * @param Request $request
