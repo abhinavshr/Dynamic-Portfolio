@@ -31,7 +31,7 @@ class ProjectImageController extends Controller
     {
         return response()->json([
             'message' => 'All project images fetched successfully.',
-            'data' => ProjectImage::all()
+            'data' => ProjectImage::with('project:id,title')->get()
         ]);
     }
 
