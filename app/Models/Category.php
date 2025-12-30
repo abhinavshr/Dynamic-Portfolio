@@ -16,4 +16,9 @@ class Category extends Model
     {
         return $this->hasMany(Project::class);
     }
+
+    public function skills()
+    {
+        return $this->hasMany(Skill::class);
+    }
 }

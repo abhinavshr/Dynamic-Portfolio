@@ -14,10 +14,15 @@ class Skill extends Model
     protected $fillable = [
         'name',
         'level',
-        'category',
+        'category_id',
     ];
 
     protected $casts = [
         'level' => 'integer',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

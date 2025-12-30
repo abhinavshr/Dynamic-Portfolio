@@ -28,19 +28,17 @@ class SkillController extends Controller
      */
     public function storeSkill(Request $request)
     {
-        // Validate the request data
         $validated = $this->validateSkill($request);
 
-        // Create a new skill
         $skill = Skill::create($validated);
 
-        // Return a JSON response with the created skill
         return response()->json([
             'success' => true,
             'message' => 'Skill created successfully.',
-            'data' => $skill,
+            'data' => $skill->load('category'),
         ], 201);
     }
+
 
     /**
      * Display a listing of all skills.
@@ -49,16 +47,15 @@ class SkillController extends Controller
      */
     public function viewAllSkills()
     {
-        // Retrieve all skills from the database
-        $skills = Skill::all();
+        $skills = Skill::with('category')->get();
 
-        // Return a JSON response with the skills
         return response()->json([
             'success' => true,
             'message' => 'Skills retrieved successfully.',
             'data' => $skills,
         ]);
     }
+
 
     /**
      * Update the specified skill in storage.
@@ -69,22 +66,19 @@ class SkillController extends Controller
      */
     public function updateSkill(Request $request, $id)
     {
-        // Retrieve the skill to be updated
         $skill = Skill::findOrFail($id);
 
-        // Validate the request data
         $validated = $this->validateSkill($request);
 
-        // Update the skill
         $skill->update($validated);
 
-        // Return a JSON response with the updated skill
         return response()->json([
             'success' => true,
             'message' => 'Skill updated successfully.',
-            'data' => $skill,
+            'data' => $skill->load('category'),
         ]);
     }
+
 
     /**
      * Remove the specified skill from storage.
@@ -94,18 +88,15 @@ class SkillController extends Controller
      */
     public function deleteSkill($id)
     {
-        // Retrieve the skill to be deleted
         $skill = Skill::findOrFail($id);
-
-        // Delete the skill
         $skill->delete();
 
-        // Return a JSON response
         return response()->json([
             'success' => true,
             'message' => 'Skill deleted successfully.',
         ]);
     }
+
 
     /**
      * Validate the request data for a skill.
@@ -115,12 +106,10 @@ class SkillController extends Controller
      */
     private function validateSkill(Request $request)
     {
-        // Validate the request data
         return $request->validate([
             'name' => 'required|string|max:255',
             'level' => 'required|integer|min:0|max:100',
-            'category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
         ]);
     }
 }
-
