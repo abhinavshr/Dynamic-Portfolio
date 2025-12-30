@@ -44,6 +44,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     // Skills
     Route::post('skills', [SkillController::class, 'storeSkill'])->name('admin.addskill');
     Route::get('skills', [SkillController::class, 'viewAllSkills'])->name('admin.viewskills');
+    Route::get('skills/{id}', [SkillController::class, 'viewSkillById'])->name('admin.viewSkillById');
     Route::put('skills/{id}', [SkillController::class, 'updateSkill'])->name('admin.updateskill');
     Route::delete('skills/{id}', [SkillController::class, 'deleteSkill'])->name('admin.deleteskill');
 

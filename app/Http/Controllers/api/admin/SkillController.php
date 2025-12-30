@@ -56,6 +56,30 @@ class SkillController extends Controller
         ]);
     }
 
+    /**
+     * Retrieve a specific skill by ID.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function viewSkillById($id)
+    {
+        // Retrieve the skill with its category
+        $skill = Skill::with('category')->find($id);
+
+        if (!$skill) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Skill not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Skill retrieved successfully.',
+            'data' => $skill,
+        ]);
+    }
 
     /**
      * Update the specified skill in storage.
