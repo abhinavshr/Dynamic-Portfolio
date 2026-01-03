@@ -143,12 +143,13 @@ class ExperienceController extends Controller
     private function validateExperience(Request $request)
     {
         return $request->validate([
-            'company_name' => 'required|string|max:255',
-            'role'         => 'required|string|max:255',
-            'start_date'   => 'required|date_format:Y-m-d',
-            'end_date'     => 'nullable|date_format:Y-m-d',
-            'is_current'   => 'required|boolean',
-            'description'  => 'nullable|string',
+            'company_name'     => 'required|string|max:255',
+            'company_location' => 'required|string|max:255',
+            'role'             => 'required|string|max:255',
+            'start_date'       => 'required|date_format:Y-m-d',
+            'end_date'         => 'nullable|date_format:Y-m-d|required_if:is_current,false',
+            'is_current'       => 'required|boolean',
+            'description'      => 'nullable|string',
         ]);
     }
 }
