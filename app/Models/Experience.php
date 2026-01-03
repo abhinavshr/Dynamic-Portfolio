@@ -11,13 +11,15 @@ class Experience extends Model
 
     protected $table = 'experiences';
 
-     protected $fillable = [
+    protected $fillable = [
         'company_name',
         'role',
         'start_date',
         'end_date',
-        'description',
+        'is_current',
+        'description'
     ];
+
 
     protected $dates = [
         'start_date',
