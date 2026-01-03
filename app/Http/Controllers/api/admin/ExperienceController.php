@@ -24,20 +24,19 @@ class ExperienceController extends Controller
      */
     public function storeExperience(Request $request)
     {
-        // Validate the incoming request data
         $validatedData = $this->validateExperience($request);
 
-        // Create a new experience entry with validated data
+        // If currently working, end_date must be null
+        if ($validatedData['is_current']) {
+            $validatedData['end_date'] = null;
+        }
+
         $experience = Experience::create($validatedData);
 
-        // Return success response with the newly created experience data
-        return response()->json(
-            [
-                'message' => 'Experience created successfully',
-                'data' => $experience
-            ],
-            201
-        );
+        return response()->json([
+            'message' => 'Experience created successfully',
+            'data' => $experience
+        ], 201);
     }
 
     /**
@@ -46,16 +45,14 @@ class ExperienceController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function viewAllExperiences(Request $request)
+    public function viewAllExperiences()
     {
-        // Retrieve all experience entries from the database
-        $experiences = Experience::all();
+        $experiences = Experience::orderBy('start_date', 'desc')->get();
 
-        // Return success response with all experiences data
         return response()->json([
             'message' => 'All experiences retrieved successfully',
             'data' => $experiences
-        ]);
+        ], 200);
     }
 
     /**
@@ -65,20 +62,20 @@ class ExperienceController extends Controller
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function viewOneByOneExperience(Request $request, $id)
+    public function viewOneByOneExperience($id)
     {
-        // Find the experience entry by ID
         $experience = Experience::find($id);
+
         if (!$experience) {
-            // Return error response if experience entry not found
-            return response()->json(['error' => 'Experience not found'], 404);
+            return response()->json([
+                'error' => 'Experience not found'
+            ], 404);
         }
 
-        // Return success response with the specific experience data
         return response()->json([
             'message' => 'Experience retrieved successfully',
             'data' => $experience
-        ]);
+        ], 200);
     }
 
     /**
@@ -90,23 +87,27 @@ class ExperienceController extends Controller
      */
     public function updateExperience(Request $request, $id)
     {
-        // Validate the incoming request data
-        $validatedData = $this->validateExperience($request);
-
-        // Find the experience entry by ID
         $experience = Experience::find($id);
 
-        // Update the experience entry with validated data
+        if (!$experience) {
+            return response()->json([
+                'error' => 'Experience not found'
+            ], 404);
+        }
+
+        $validatedData = $this->validateExperience($request);
+
+        // If currently working, end_date must be null
+        if ($validatedData['is_current']) {
+            $validatedData['end_date'] = null;
+        }
+
         $experience->update($validatedData);
 
-        // Return success response with updated experience data
-        return response()->json(
-            [
-                'message' => 'Experience updated successfully',
-                'data' => $experience
-            ],
-            200
-        );
+        return response()->json([
+            'message' => 'Experience updated successfully',
+            'data' => $experience
+        ], 200);
     }
 
     /**
@@ -141,14 +142,13 @@ class ExperienceController extends Controller
      */
     private function validateExperience(Request $request)
     {
-        // Define validation rules for experience data
         return $request->validate([
             'company_name' => 'required|string|max:255',
             'role'         => 'required|string|max:255',
             'start_date'   => 'required|date_format:Y-m-d',
             'end_date'     => 'nullable|date_format:Y-m-d',
+            'is_current'   => 'required|boolean',
             'description'  => 'nullable|string',
         ]);
     }
 }
-
