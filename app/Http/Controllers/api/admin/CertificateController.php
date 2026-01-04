@@ -5,8 +5,6 @@ namespace App\Http\Controllers\api\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * Class CertificateController
@@ -15,12 +13,7 @@ use Illuminate\Support\Str;
 class CertificateController extends Controller
 {
     /**
-     * @var string
-     */
-    private $imageStoragePath = 'public/certificates';
-
-    /**
-     * Constructor to set auth middleware
+     * Constructor to apply auth middleware
      */
     public function __construct()
     {
@@ -28,128 +21,78 @@ class CertificateController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Store a newly created certificate.
      */
     public function storeCertificate(Request $request)
     {
-        $validatedData = $this->validateCertificate($request, true);
+        $validatedData = $this->validateCertificate($request);
 
-        if ($request->hasFile('certificate_photo')) {
-            $file = $request->file('certificate_photo');
-            $extension = $file->getClientOriginalExtension();
-            $fileName = Str::slug($validatedData['title'] . '-' . time()) . '.' . $extension;
-            $file->storeAs($this->imageStoragePath, $fileName);
-            $filePath = $this->imageStoragePath . '/' . $fileName;
-        } else {
-            return response()->json(['error' => 'No image file uploaded'], 400);
-        }
-
-        $certificate = Certificate::create([
-            'title' => $validatedData['title'],
-            'issuer' => $validatedData['issuer'],
-            'issue_date' => $validatedData['issue_date'],
-            'certificate_photo' => $filePath,
-        ]);
+        $certificate = Certificate::create($validatedData);
 
         return response()->json([
-            'message' => 'Image uploaded successfully',
-            'data' => $certificate,
-            'image_url' => asset('storage/' . $filePath),
+            'message' => 'Certificate created successfully',
+            'certificate' => $certificate,
         ], 201);
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Display all certificates.
      */
-    public function viewAllCertificates(Request $request)
+    public function viewAllCertificates()
     {
-        $certificates = Certificate::all();
         return response()->json([
-            'message' => 'All Certificates',
-            'certificates' => $certificates,
+            'message' => 'All certificates',
+            'certificates' => Certificate::all(),
         ]);
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Display a single certificate by ID.
      */
-    public function viewOneByOneCertificate(Request $request, $id)
+    public function viewOneByOneCertificate($id)
     {
         $certificate = Certificate::findOrFail($id);
+
         return response()->json([
-            'message' => 'Certificate',
+            'message' => 'Certificate details',
             'certificate' => $certificate,
         ]);
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Update a certificate.
      */
     public function updateCertificate(Request $request, $id)
     {
-        $validatedData = $this->validateCertificate($request, false);
-
         $certificate = Certificate::find($id);
+
         if (!$certificate) {
             return response()->json([
                 'error' => 'Certificate not found',
             ], 404);
         }
 
-        if ($request->hasFile('certificate_photo')) {
-            if ($certificate->certificate_photo && Storage::disk('public')->exists($certificate->certificate_photo)) {
-                Storage::disk('public')->delete($certificate->certificate_photo);
-            }
-
-            $file = $request->file('certificate_photo');
-            $extension = $file->getClientOriginalExtension();
-            $fileName = Str::slug($validatedData['title'] . '-' . time()) . '.' . $extension;
-            $filePath = $file->storeAs($this->imageStoragePath, $fileName, 'public');
-
-            $validatedData['certificate_photo'] = $filePath;
-        }
+        $validatedData = $this->validateCertificate($request, false);
 
         $certificate->update($validatedData);
 
         return response()->json([
             'message' => 'Certificate updated successfully',
             'certificate' => $certificate,
-            'image_url' => $certificate->certificate_photo ? asset('storage/' . $certificate->certificate_photo) : null,
         ]);
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Delete a certificate.
      */
-    public function deleteCertificate(Request $request, $id)
+    public function deleteCertificate($id)
     {
         $certificate = Certificate::find($id);
+
         if (!$certificate) {
             return response()->json([
                 'error' => 'Certificate not found',
             ], 404);
-        }
-
-        if ($certificate->certificate_photo && Storage::disk('public')->exists($certificate->certificate_photo)) {
-            Storage::disk('public')->delete($certificate->certificate_photo);
         }
 
         $certificate->delete();
@@ -160,22 +103,16 @@ class CertificateController extends Controller
     }
 
     /**
-     * Validate the request data
-     *
-     * @param Request $request
-     * @param bool $isCreate
-     * @return array
+     * Validate certificate data.
      */
     private function validateCertificate(Request $request, $isCreate = true)
     {
         return $request->validate([
-            'title' => 'required|string|max:255',
-            'issuer' => 'required|string|max:255',
-            'issue_date' => 'required|date_format:Y-m-d',
-            'certificate_photo' => $isCreate
-                ? 'required|image|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048'
-                : 'nullable|image|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048',
+            'title'            => 'required|string|max:255',
+            'issuer'           => 'required|string|max:255',
+            'issue_date'       => 'required|date_format:Y-m-d',
+            'credential_id'    => 'nullable|string|max:255',
+            'verification_url' => 'nullable|url|max:255',
         ]);
     }
 }
-
