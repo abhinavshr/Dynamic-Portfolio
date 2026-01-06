@@ -24,7 +24,13 @@ class ContactController extends Controller
             'message' => 'required|string',
         ]);
 
-        $contact = Contact::create($validatedData);
+        $contact = Contact::create([
+            'name'    => $validatedData['name'],
+            'email'   => $validatedData['email'],
+            'subject' => $validatedData['subject'],
+            'message' => $validatedData['message'],
+            'is_read' => false,
+        ]);
 
         return response()->json([
             'message' => 'Thank you for contacting us!',

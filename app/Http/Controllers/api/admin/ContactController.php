@@ -8,43 +8,69 @@ use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-    // This middleware will check if the request is authenticated with the admin guard
     public function __construct()
     {
         $this->middleware('auth:admin');
     }
 
-    // This method will return all contacts
+    /**
+     * Get all contacts (with filter)
+     * ?status=all|read|unread
+     */
     public function viewAllContacts(Request $request)
     {
-        // Retrieve all contacts from the database
-        $contacts = Contact::all();
+        $status = $request->query('status');
 
-        // Return the contacts in JSON format
+        $query = Contact::query();
+
+        if ($status === 'unread') {
+            $query->where('is_read', false);
+        }
+
+        if ($status === 'read') {
+            $query->where('is_read', true);
+        }
+
         return response()->json([
-            'message' => 'All contacts retrieved successfully',
-            'data' => $contacts,
+            'message' => 'Contacts retrieved successfully',
+            'data' => $query->orderBy('created_at', 'desc')->get()
         ]);
     }
 
-    // This method will return a single contact
-    public function viewOneContact(Request $request, $id)
+    /**
+     * View one contact & mark as read
+     */
+    public function viewOneContact($id)
     {
-        // Retrieve the contact from the database
         $contact = Contact::find($id);
 
-        // If the contact is not found, return a 404 error
         if (!$contact) {
             return response()->json([
-                'error' => 'Contact not found',
+                'error' => 'Contact not found'
             ], 404);
         }
 
-        // Return the contact in JSON format
+        // 👁️ Mark as seen when admin views it
+        if (!$contact->is_read) {
+            $contact->update(['is_read' => true]);
+        }
+
         return response()->json([
             'message' => 'Contact retrieved successfully',
-            'data' => $contact,
+            'data' => $contact
+        ]);
+    }
+
+    /**
+     * Mark contact as read manually
+     */
+    public function markAsRead($id)
+    {
+        $contact = Contact::findOrFail($id);
+        $contact->update(['is_read' => true]);
+
+        return response()->json([
+            'message' => 'Message marked as read'
         ]);
     }
 }
-

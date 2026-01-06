@@ -79,4 +79,5 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     // Contact Messages
     Route::get('contacts', [ContactController::class, 'viewAllContacts'])->name('admin.viewcontacts');
     Route::get('contacts/{id}', [ContactController::class, 'viewOneContact'])->name('admin.viewcontact');
+    Route::patch('/admin/contacts/{id}/read', [ContactController::class, 'markAsRead'])->name('admin.markasread');
 });
