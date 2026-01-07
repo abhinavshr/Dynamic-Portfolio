@@ -50,11 +50,6 @@ class ContactController extends Controller
             ], 404);
         }
 
-        // 👁️ Mark as seen when admin views it
-        if (!$contact->is_read) {
-            $contact->update(['is_read' => true]);
-        }
-
         return response()->json([
             'message' => 'Contact retrieved successfully',
             'data' => $contact
