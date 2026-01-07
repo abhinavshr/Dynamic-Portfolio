@@ -75,4 +75,24 @@ class ContactController extends Controller
             'message' => 'Message marked as read'
         ]);
     }
+
+    /**
+     * Delete a contact by ID
+     */
+    public function deleteContact($id)
+    {
+        $contact = Contact::find($id);
+
+        if (!$contact) {
+            return response()->json([
+                'message' => 'Contact not found'
+            ], 404);
+        }
+
+        $contact->delete();
+
+        return response()->json([
+            'message' => 'Contact deleted successfully'
+        ]);
+    }
 }
