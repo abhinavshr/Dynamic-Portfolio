@@ -66,7 +66,14 @@ class ContactController extends Controller
      */
     public function markAsRead($id)
     {
-        $contact = Contact::findOrFail($id);
+        $contact = Contact::find($id);
+
+        if (!$contact) {
+            return response()->json([
+                'message' => 'Contact not found'
+            ], 404);
+        }
+
         $contact->update(['is_read' => true]);
 
         return response()->json([
