@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Str;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -99,6 +100,52 @@ class ProfileController extends Controller
             'success' => true,
             'message' => 'Profile updated successfully.',
             'user' => $user,
+        ]);
+    }
+
+    /**
+     * Changes the password of the currently logged in admin user.
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function changePassword(Request $request)
+    {
+        $adminId = Auth::guard('admin')->id();
+        $user = User::findOrFail($adminId);
+
+        // Validate input
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        // Check if current password is correct
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password is incorrect.',
+            ], 400);
+        }
+
+        // Check if new password is the same as current password
+        if (Hash::check($validated['new_password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'New password cannot be the same as the current password.',
+            ], 400);
+        }
+
+        // Update password
+        $user->password = Hash::make($validated['new_password']);
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password changed successfully.',
         ]);
     }
 }

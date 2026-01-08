@@ -86,4 +86,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     // admin setting
     Route::post('profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('admin.updateProfilePhoto');
     Route::put('profile', [ProfileController::class, 'updateProfile'])->name('admin.updateProfile');
+    Route::put('profile/password', [ProfileController::class, 'changePassword'])->name('admin.changePassword');
+
 });
