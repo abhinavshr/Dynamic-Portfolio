@@ -7,6 +7,7 @@ use App\Http\Controllers\api\admin\CertificateController;
 use App\Http\Controllers\api\admin\ContactController;
 use App\Http\Controllers\api\admin\EducationController;
 use App\Http\Controllers\api\admin\ExperienceController;
+use App\Http\Controllers\api\admin\ProfileController;
 use App\Http\Controllers\api\admin\ProjectController;
 use App\Http\Controllers\api\admin\ProjectImageController;
 use App\Http\Controllers\api\admin\SkillController;
@@ -81,4 +82,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('contacts/{id}', [ContactController::class, 'viewOneContact'])->name('admin.viewcontact');
     Route::patch('contacts/{id}/read', [ContactController::class, 'markAsRead'])->name('admin.markasread');
     Route::delete('contacts/{id}', [ContactController::class, 'deleteContact'])->name('admin.deletecontact');
+
+    // admin setting
+    Route::post('profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('admin.updateProfilePhoto');
 });
