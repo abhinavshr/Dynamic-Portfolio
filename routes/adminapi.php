@@ -84,8 +84,9 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::delete('contacts/{id}', [ContactController::class, 'deleteContact'])->name('admin.deletecontact');
 
     // admin setting
+    Route::get('profile', action: [ProfileController::class, 'getProfile'])->name('admin.getProfile');
     Route::post('profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('admin.updateProfilePhoto');
-    Route::put('profile', [ProfileController::class, 'updateProfile'])->name('admin.updateProfile');
+    Route::put('profile', action: [ProfileController::class, 'updateProfile'])->name('admin.updateProfile');
     Route::put('profile/password', [ProfileController::class, 'changePassword'])->name('admin.changePassword');
 
 });
