@@ -12,6 +12,24 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+
+    /**
+     * Get the current admin user profile.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProfile()
+    {
+        $adminId = Auth::guard('admin')->id();
+        $user = User::findOrFail($adminId);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin details fetched successfully.',
+            'user' => $user
+        ]);
+    }
+
     public function updateProfilePhoto(Request $request)
     {
         $request->validate([
