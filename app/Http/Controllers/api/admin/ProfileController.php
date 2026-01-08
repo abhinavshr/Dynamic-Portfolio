@@ -48,6 +48,16 @@ class ProfileController extends Controller
         ]);
     }
 
+    /**
+     * Deletes a file from Cloudinary using a secure URL.
+     *
+     * @param string $url The secure URL of the file to delete.
+     *
+     * @return void
+     *
+     * @throws \Exception If the deletion fails.
+     */
+
     private function deleteFromCloudinary(string $url): void
     {
         try {
@@ -57,5 +67,38 @@ class ProfileController extends Controller
         } catch (\Exception $e) {
             // silent fail
         }
+    }
+
+    /**
+     * Update the admin profile.
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+
+    public function updateProfile(Request $request)
+    {
+        $adminId = Auth::guard('admin')->id();
+        $user = User::findOrFail($adminId);
+
+        // Validate input
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+        ]);
+
+        // Update user
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully.',
+            'user' => $user,
+        ]);
     }
 }
