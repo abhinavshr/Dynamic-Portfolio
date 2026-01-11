@@ -46,7 +46,7 @@ class User extends Authenticatable implements JWTSubject
         'password' => 'hashed',
     ];
 
-     public function getJWTIdentifier()
+    public function getJWTIdentifier()
     {
         return $this->getKey();
     }
@@ -54,5 +54,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function adminProfile()
+    {
+        return $this->hasOne(AdminProfile::class);
     }
 }
