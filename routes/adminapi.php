@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\admin\AdminAuthController;
+use App\Http\Controllers\api\admin\AdminProfileController;
 use App\Http\Controllers\api\admin\CategoryController;
 use App\Http\Controllers\api\admin\CertificateController;
 use App\Http\Controllers\api\admin\ContactController;
@@ -89,4 +90,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::put('profile', action: [ProfileController::class, 'updateProfile'])->name('admin.updateProfile');
     Route::put('profile/password', [ProfileController::class, 'changePassword'])->name('admin.changePassword');
 
+    // admin profile
+    Route::post('/admin-info', [AdminProfileController::class, 'store'])->name('admin.profile.store');
 });
