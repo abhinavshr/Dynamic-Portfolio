@@ -93,4 +93,5 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     // admin profile
     Route::get('/admin-info', [AdminProfileController::class, 'show'])->name('admin.profile.show');
     Route::post('/admin-info', [AdminProfileController::class, 'store'])->name('admin.profile.store');
+    Route::put('/admin-info/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
 });
