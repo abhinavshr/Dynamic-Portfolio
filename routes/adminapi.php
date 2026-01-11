@@ -91,5 +91,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::put('profile/password', [ProfileController::class, 'changePassword'])->name('admin.changePassword');
 
     // admin profile
+    Route::get('/admin-info', [AdminProfileController::class, 'show'])->name('admin.profile.show');
     Route::post('/admin-info', [AdminProfileController::class, 'store'])->name('admin.profile.store');
 });
