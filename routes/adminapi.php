@@ -93,5 +93,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     // admin profile
     Route::get('/admin-info', [AdminProfileController::class, 'show'])->name('admin.profile.show');
     Route::post('/admin-info', [AdminProfileController::class, 'store'])->name('admin.profile.store');
-    Route::put('/admin-info/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
-});
+    Route::put('/admin/profile/basic-info', [AdminProfileController::class, 'updateBasicInfo'])->name('admin.profile.basic-info');
+    Route::put('/admin/profile/portfolio-stats', [AdminProfileController::class, 'updatePortfolioStats'])->name('admin.profile.portfolio-stats');
+    Route::put('/admin/profile/social-links', [AdminProfileController::class, 'updateSocialLinks']);})->name('admin.profile.social-links');
