@@ -70,37 +70,87 @@ class AdminProfileController extends Controller
     }
 
     /**
-     * Update the admin profile.
+     * Update the basic information for the currently logged in admin user.
+     *
+     * Validates the request and updates the basic information in the database.
+     * Returns a JSON response with the status, message and the updated profile.
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
-     *
-     * @bodyParam string phone_number The admin's phone number.
-     * @bodyParam string professional_title The admin's professional title.
-     * @bodyParam string tagline The admin's tagline.
-     * @bodyParam string about_me The admin's about me information.
-     * @bodyParam integer years_of_experience The admin's years of experience.
-     * @bodyParam integer projects_completed The admin's projects completed.
-     * @bodyParam integer happy_clients The admin's happy clients.
-     * @bodyParam integer technologies_used The admin's technologies used.
-     * @bodyParam string github_url The admin's GitHub URL.
-     * @bodyParam string linkedin_url The admin's LinkedIn URL.
-     * @bodyParam string cv_url The admin's CV URL.
-     * @bodyParam string twitter_url The admin's Twitter URL.
      */
-    public function update(Request $request)
+    public function updateBasicInfo(Request $request)
     {
         $request->validate([
             'phone_number' => 'nullable|string|max:20',
             'professional_title' => 'nullable|string|max:255',
             'tagline' => 'nullable|string|max:255',
             'about_me' => 'nullable|string',
+        ]);
 
+        $profile = AdminProfile::updateOrCreate(
+            ['user_id' => Auth::id()],
+            $request->only([
+                'phone_number',
+                'professional_title',
+                'tagline',
+                'about_me'
+            ])
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Basic information updated successfully',
+            'data' => $profile
+        ]);
+    }
+
+    /**
+     * Update the portfolio statistics for the currently logged in admin user.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @bodyParam int years_of_experience The number of years of experience the admin user has.
+     * @bodyParam int projects_completed The number of projects the admin user has completed.
+     * @bodyParam int happy_clients The number of happy clients the admin user has worked with.
+     * @bodyParam int technologies_used The number of technologies the admin user has used.
+     */
+    public function updatePortfolioStats(Request $request)
+    {
+        $request->validate([
             'years_of_experience' => 'nullable|integer|min:0',
             'projects_completed' => 'nullable|integer|min:0',
             'happy_clients' => 'nullable|integer|min:0',
             'technologies_used' => 'nullable|integer|min:0',
+        ]);
 
+        $profile = AdminProfile::updateOrCreate(
+            ['user_id' => Auth::id()],
+            $request->only([
+                'years_of_experience',
+                'projects_completed',
+                'happy_clients',
+                'technologies_used'
+            ])
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Portfolio statistics updated successfully',
+            'data' => $profile
+        ]);
+    }
+
+    /**
+     * Update the social links for the admin's profile.
+     *
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateSocialLinks(Request $request)
+    {
+        $request->validate([
             'github_url' => 'nullable|url',
             'linkedin_url' => 'nullable|url',
             'cv_url' => 'nullable|url',
@@ -109,26 +159,18 @@ class AdminProfileController extends Controller
 
         $profile = AdminProfile::updateOrCreate(
             ['user_id' => Auth::id()],
-            [
-                'phone_number' => $request->phone_number,
-                'professional_title' => $request->professional_title,
-                'tagline' => $request->tagline,
-                'about_me' => $request->about_me,
-                'years_of_experience' => $request->years_of_experience,
-                'projects_completed' => $request->projects_completed,
-                'happy_clients' => $request->happy_clients,
-                'technologies_used' => $request->technologies_used,
-                'github_url' => $request->github_url,
-                'linkedin_url' => $request->linkedin_url,
-                'cv_url' => $request->cv_url,
-                'twitter_url' => $request->twitter_url,
-            ]
+            $request->only([
+                'github_url',
+                'linkedin_url',
+                'cv_url',
+                'twitter_url'
+            ])
         );
 
         return response()->json([
             'status' => true,
-            'message' => 'Admin information updated successfully',
+            'message' => 'Social links updated successfully',
             'data' => $profile
-        ], 200);
+        ]);
     }
 }
