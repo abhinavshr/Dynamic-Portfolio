@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Skill;
+use App\Models\SoftSkill;
 use Illuminate\Http\Request;
 
 /**
@@ -121,6 +122,21 @@ class SkillController extends Controller
         ]);
     }
 
+    public function totalSkills()
+    {
+        $totalSkills = Skill::count();
+        $totalSoftSkills = SoftSkill::count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Total skills fetched successfully.',
+            'data' => [
+                'total_skills' => $totalSkills,
+                'total_soft_skills' => $totalSoftSkills,
+                'grand_total' => $totalSkills + $totalSoftSkills
+            ]
+        ]);
+    }
 
     /**
      * Validate the request data for a skill.
