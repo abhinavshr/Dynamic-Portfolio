@@ -95,4 +95,17 @@ class ContactController extends Controller
             'message' => 'Contact deleted successfully'
         ]);
     }
+
+    public function totalContacts()
+    {
+        $totalContacts = Contact::count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Total contacts fetched successfully.',
+            'data' => [
+                'total_contacts' => $totalContacts
+            ]
+        ]);
+    }
 }
