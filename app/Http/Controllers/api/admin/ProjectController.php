@@ -115,6 +115,17 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function totalProjects()
+    {
+        $count = Project::count();
+
+        return response()->json([
+            'message' => 'Total projects fetched successfully',
+            'total_projects' => $count
+        ]);
+    }
+
+
     /**
      * Validate the project data from the request.
      *
