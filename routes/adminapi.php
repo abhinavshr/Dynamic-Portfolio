@@ -72,6 +72,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('certificates/{id}', [CertificateController::class, 'viewOneByOneCertificate'])->name('admin.viewcertificate');
     Route::put('certificates/{id}', [CertificateController::class, 'updateCertificate'])->name('admin.updatecertificate');
     Route::delete('certificates/{id}', [CertificateController::class, 'deleteCertificate'])->name('admin.deletecertificate');
+    Route::get('/total-certificates', [CertificateController::class, 'totalCertificates'])->name('admin.totalcertificates');
 
     // Soft Skills
     Route::post('soft-skills', [SoftSkillController::class, 'storeSoftSkill'])->name('admin.addsoftskill');

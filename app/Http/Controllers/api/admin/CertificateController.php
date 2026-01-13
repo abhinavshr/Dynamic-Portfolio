@@ -102,6 +102,20 @@ class CertificateController extends Controller
         ]);
     }
 
+    public function totalCertificates()
+    {
+        $totalCertificates = Certificate::count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Total certificates fetched successfully.',
+            'data' => [
+                'total_certificates' => $totalCertificates
+            ]
+        ]);
+    }
+
+
     /**
      * Validate certificate data.
      */
