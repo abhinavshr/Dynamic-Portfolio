@@ -50,6 +50,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('skills/{id}', [SkillController::class, 'viewSkillById'])->name('admin.viewSkillById');
     Route::put('skills/{id}', [SkillController::class, 'updateSkill'])->name('admin.updateskill');
     Route::delete('skills/{id}', [SkillController::class, 'deleteSkill'])->name('admin.deleteskill');
+    Route::get('/total-skills', [SkillController::class, 'totalSkills'])->name('admin.totalskills');
 
     // Education
     Route::post('educations', [EducationController::class, 'storeEducation'])->name('admin.addeducation');
