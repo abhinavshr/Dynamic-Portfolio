@@ -138,6 +138,7 @@ class SkillController extends Controller
         ]);
     }
 
+
     /**
      * Validate the request data for a skill.
      *

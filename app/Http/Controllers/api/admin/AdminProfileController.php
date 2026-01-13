@@ -173,4 +173,17 @@ class AdminProfileController extends Controller
             'data' => $profile
         ]);
     }
+
+    public function getExperience()
+    {
+        $user = Auth::user();
+
+        $profile = AdminProfile::where('user_id', $user->id)->first();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Years of experience fetched successfully',
+            'years_of_experience' => $profile->years_of_experience ?? 0
+        ]);
+    }
 }

@@ -98,4 +98,5 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::put('/admin-info/basic-info', [AdminProfileController::class, 'updateBasicInfo']);
     Route::put('/admin-info/portfolio-stats', [AdminProfileController::class, 'updatePortfolioStats']);
     Route::put('/admin-info/social-links', [AdminProfileController::class, 'updateSocialLinks']);
+    Route::get('/total-experiences', [AdminAuthController::class, 'getExperience'])->name('admin.getExperience');
 });
