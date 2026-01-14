@@ -96,6 +96,11 @@ class ContactController extends Controller
         ]);
     }
 
+    /**
+     * Returns the total number of contacts.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function totalContacts()
     {
         $totalContacts = Contact::count();

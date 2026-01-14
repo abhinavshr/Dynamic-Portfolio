@@ -116,6 +116,11 @@ class ProjectController extends Controller
         ]);
     }
 
+/**
+ * Fetch the total number of projects from the database.
+ *
+ * @return \Illuminate\Http\JsonResponse
+ */
     public function totalProjects()
     {
         $count = Project::count();
