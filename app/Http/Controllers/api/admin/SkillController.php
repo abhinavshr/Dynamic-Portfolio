@@ -122,6 +122,11 @@ class SkillController extends Controller
         ]);
     }
 
+    /**
+     * Retrieve the total number of skills and soft skills.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function totalSkills()
     {
         $totalSkills = Skill::count();

@@ -174,6 +174,11 @@ class AdminProfileController extends Controller
         ]);
     }
 
+/**
+ * Get the number of years of experience for the currently logged in admin user.
+ *
+ * @return \Illuminate\Http\JsonResponse
+ */
     public function getExperience()
     {
         $user = Auth::user();

@@ -102,6 +102,13 @@ class CertificateController extends Controller
         ]);
     }
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Get the total number of certificates.
+ *
+ * @return \Illuminate\Http\JsonResponse
+ */
+/*******  8ac24c0d-dcc4-44da-98aa-9c023b887941  *******/
     public function totalCertificates()
     {
         $totalCertificates = Certificate::count();
