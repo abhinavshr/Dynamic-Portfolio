@@ -35,6 +35,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('projects/{id}', [ProjectController::class, 'viewProjectById'])->name('admin.viewproject');
     Route::delete('projects/{id}', [ProjectController::class, 'deleteProject'])->name('admin.deleteproject');
     Route::get('/total-projects', [ProjectController::class, 'totalProjects'])->name('admin.totalprojects');
+    Route::get('recent-projects', [ProjectController::class, 'recentProjects'])->name('admin.recentprojects');
 
     // Project Images
     Route::post('project-images', [ProjectImageController::class, 'storeProjectImage'])->name('admin.addprojectimage');

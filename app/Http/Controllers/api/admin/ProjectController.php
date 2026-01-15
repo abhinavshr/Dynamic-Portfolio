@@ -116,11 +116,11 @@ class ProjectController extends Controller
         ]);
     }
 
-/**
- * Fetch the total number of projects from the database.
- *
- * @return \Illuminate\Http\JsonResponse
- */
+    /**
+     * Fetch the total number of projects from the database.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function totalProjects()
     {
         $count = Project::count();
@@ -131,6 +131,22 @@ class ProjectController extends Controller
         ]);
     }
 
+    /**
+     * Fetch the 4 most recent projects from the database.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function recentProjects()
+    {
+        $projects = Project::orderBy('created_at', 'desc')
+            ->take(4)
+            ->get();
+
+        return response()->json([
+            'message' => 'Recent projects fetched successfully',
+            'projects' => $projects
+        ]);
+    }
 
     /**
      * Validate the project data from the request.
