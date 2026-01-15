@@ -88,6 +88,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::patch('contacts/{id}/read', [ContactController::class, 'markAsRead'])->name('admin.markasread');
     Route::delete('contacts/{id}', [ContactController::class, 'deleteContact'])->name('admin.deletecontact');
     Route::get('/total-contacts', [ContactController::class, 'totalContacts'])->name('admin.totalcontacts');
+    Route::get('recent-contacts', [ContactController::class, 'recentContacts'])->name('admin.recentcontacts');
 
     // admin setting
     Route::get('profile', action: [ProfileController::class, 'getProfile'])->name('admin.getProfile');

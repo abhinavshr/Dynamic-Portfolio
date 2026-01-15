@@ -113,4 +113,21 @@ class ContactController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Fetch the 3 most recent contacts from the database.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function recentContacts()
+    {
+        $contacts = Contact::orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        return response()->json([
+            'message' => 'Recent contacts fetched successfully',
+            'data' => $contacts
+        ]);
+    }
 }
