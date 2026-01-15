@@ -138,7 +138,8 @@ class ProjectController extends Controller
      */
     public function recentProjects()
     {
-        $projects = Project::orderBy('created_at', 'desc')
+        $projects = Project::with('category')
+            ->orderBy('created_at', 'desc')
             ->take(4)
             ->get();
 
@@ -147,6 +148,7 @@ class ProjectController extends Controller
             'projects' => $projects
         ]);
     }
+
 
     /**
      * Validate the project data from the request.
