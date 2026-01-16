@@ -38,11 +38,22 @@ class CertificateController extends Controller
     /**
      * Display all certificates.
      */
-    public function viewAllCertificates()
+    public function viewAllCertificates(Request $request)
     {
+        $certificates = Certificate::paginate(8);
+
         return response()->json([
-            'message' => 'All certificates',
-            'certificates' => Certificate::all(),
+            'success'     => true,
+            'message'     => 'Certificates retrieved successfully.',
+            'data'        => $certificates->items(),
+            'pagination'  => [
+                'total'        => $certificates->total(),
+                'per_page'     => $certificates->perPage(),
+                'current_page' => $certificates->currentPage(),
+                'last_page'    => $certificates->lastPage(),
+                'next_page_url' => $certificates->nextPageUrl(),
+                'prev_page_url' => $certificates->previousPageUrl(),
+            ]
         ]);
     }
 
@@ -102,13 +113,11 @@ class CertificateController extends Controller
         ]);
     }
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Get the total number of certificates.
- *
- * @return \Illuminate\Http\JsonResponse
- */
-/*******  8ac24c0d-dcc4-44da-98aa-9c023b887941  *******/
+    /**
+     * Get the total number of certificates.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function totalCertificates()
     {
         $totalCertificates = Certificate::count();

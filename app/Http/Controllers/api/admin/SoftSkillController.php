@@ -47,14 +47,22 @@ class SoftSkillController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function viewAllSoftSkill()
+    public function viewAllSoftSkill(Request $request)
     {
-        $softskills = SoftSkill::all();
+        $softskills = SoftSkill::paginate(8);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Soft skills retrieved successfully.',
-            'data' => $softskills
+            'success'    => true,
+            'message'    => 'Soft skills retrieved successfully.',
+            'data'       => $softskills->items(),
+            'pagination' => [
+                'total'        => $softskills->total(),
+                'per_page'     => $softskills->perPage(),
+                'current_page' => $softskills->currentPage(),
+                'last_page'    => $softskills->lastPage(),
+                'next_page_url' => $softskills->nextPageUrl(),
+                'prev_page_url' => $softskills->previousPageUrl(),
+            ]
         ]);
     }
 
@@ -128,4 +136,3 @@ class SoftSkillController extends Controller
         ]);
     }
 }
-
