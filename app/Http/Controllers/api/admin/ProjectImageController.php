@@ -27,11 +27,21 @@ class ProjectImageController extends Controller
      * View all project images
      * @return \Illuminate\Http\JsonResponse
      */
-    public function projectImageView()
+    public function projectImageView(Request $request)
     {
+        $projectImages = ProjectImage::with('project:id,title')->paginate(8);
+
         return response()->json([
-            'message' => 'All project images fetched successfully.',
-            'data' => ProjectImage::with('project:id,title')->get()
+            'message'    => 'Project images fetched successfully.',
+            'data'       => $projectImages->items(),
+            'pagination' => [
+                'total'        => $projectImages->total(),
+                'per_page'     => $projectImages->perPage(),
+                'current_page' => $projectImages->currentPage(),
+                'last_page'    => $projectImages->lastPage(),
+                'next_page_url' => $projectImages->nextPageUrl(),
+                'prev_page_url' => $projectImages->previousPageUrl(),
+            ]
         ]);
     }
 
