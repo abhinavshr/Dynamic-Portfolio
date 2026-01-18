@@ -45,8 +45,8 @@ class EducationController extends Controller
      */
     public function viewAllEducations(Request $request)
     {
-        // Fetch all education records
-        $educations = Education::all();
+
+        $educations = Education::paginate(6);
 
         // Return success response with all education data
         return response()->json([
@@ -152,4 +152,3 @@ class EducationController extends Controller
         ]);
     }
 }
-

@@ -33,7 +33,7 @@ class ContactController extends Controller
 
         return response()->json([
             'message' => 'Contacts retrieved successfully',
-            'data' => $query->orderBy('created_at', 'desc')->get()
+            'data' => $query->orderBy('created_at', 'desc')->paginate(6)
         ]);
     }
 
