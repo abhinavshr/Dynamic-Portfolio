@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Skill;
 use App\Models\SoftSkill;
 use Illuminate\Http\Request;
@@ -46,16 +47,20 @@ class SkillController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function viewAllSkills()
-    {
-        $skills = Skill::with('category')->get();
+    public function viewAllSkills(Request $request)
+{
+    $categories = Category::whereHas('skills')
+        ->with(['skills' => function ($query) {
+            $query->with('category')->limit(6);
+        }])
+        ->paginate(3);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Skills retrieved successfully.',
-            'data' => $skills,
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Skills retrieved successfully.',
+        'data' => $categories
+    ]);
+}
 
     /**
      * Retrieve a specific skill by ID.
