@@ -43,7 +43,7 @@ class ProjectController extends Controller
      */
     public function viewAllProjects(Request $request)
     {
-        $projects = Project::all();
+        $projects = Project::paginate(6);
 
         return response()->json([
             'message' => 'Projects fetched successfully',

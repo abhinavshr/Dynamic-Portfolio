@@ -47,7 +47,7 @@ class ExperienceController extends Controller
      */
     public function viewAllExperiences()
     {
-        $experiences = Experience::orderBy('start_date', 'desc')->get();
+        $experiences = Experience::orderBy('start_date', 'desc')->paginate(6);
 
         return response()->json([
             'message' => 'All experiences retrieved successfully',
