@@ -48,19 +48,23 @@ class SkillController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function viewAllSkills(Request $request)
-{
-    $categories = Category::whereHas('skills')
-        ->with(['skills' => function ($query) {
-            $query->with('category')->limit(6);
-        }])
-        ->paginate(3);
+    {
+        $categories = Category::whereHas('skills')
+            ->paginate(3);
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Skills retrieved successfully.',
-        'data' => $categories
-    ]);
-}
+        foreach ($categories as $category) {
+            $category->skills = $category->skills()
+                ->with('category')
+                ->orderBy('id', 'asc')
+                ->get();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Skills retrieved successfully.',
+            'data' => $categories
+        ]);
+    }
 
     /**
      * Retrieve a specific skill by ID.
