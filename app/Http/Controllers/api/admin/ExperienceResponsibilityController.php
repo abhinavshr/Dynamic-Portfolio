@@ -56,4 +56,13 @@ class ExperienceResponsibilityController extends Controller
             'data' => $responsibility
         ]);
     }
+
+    public function deleteResponsibility(ExperienceResponsibility $responsibility)
+    {
+        $responsibility->delete();
+
+        return response()->json([
+            'message' => 'Deleted successfully'
+        ]);
+    }
 }
