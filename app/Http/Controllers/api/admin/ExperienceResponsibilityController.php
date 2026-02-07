@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Experience;
 use App\Models\ExperienceResponsibility;
 use Illuminate\Http\Request;
 
@@ -24,5 +25,19 @@ class ExperienceResponsibilityController extends Controller
         ]);
 
         return response()->json(['message' => 'Added successfully']);
+    }
+
+    public function getAllResponsibilities()
+    {
+        $responsibilities = ExperienceResponsibility::with('experience')->get();
+
+        return response()->json($responsibilities);
+    }
+
+    public function getResponsibilitiesByExperience(Experience $experience)
+    {
+        return response()->json(
+            $experience->responsibilities()->get()
+        );
     }
 }

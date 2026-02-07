@@ -107,4 +107,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     //experience responsibilities
     Route::post('/experiences/{experience}/responsibilities', [ExperienceResponsibilityController::class, 'addResponsibility']);
+    Route::get('/responsibilities', [ExperienceResponsibilityController::class, 'getAllResponsibilities']);
+    Route::get('/experiences/{experience}/responsibilities', [ExperienceResponsibilityController::class, 'getResponsibilitiesByExperience']);
 });
