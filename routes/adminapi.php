@@ -8,6 +8,7 @@ use App\Http\Controllers\api\admin\CertificateController;
 use App\Http\Controllers\api\admin\ContactController;
 use App\Http\Controllers\api\admin\EducationController;
 use App\Http\Controllers\api\admin\ExperienceController;
+use App\Http\Controllers\api\admin\ExperienceResponsibilityController;
 use App\Http\Controllers\api\admin\ProfileController;
 use App\Http\Controllers\api\admin\ProjectController;
 use App\Http\Controllers\api\admin\ProjectImageController;
@@ -26,7 +27,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::post('logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
     // Categories
-     Route::get('categories', [CategoryController::class, 'index'])->name('admin.categories');
+    Route::get('categories', [CategoryController::class, 'index'])->name('admin.categories');
 
     // Projects
     Route::post('projects', [ProjectController::class, 'addProject'])->name('admin.addproject');
@@ -103,4 +104,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::put('/admin-info/portfolio-stats', [AdminProfileController::class, 'updatePortfolioStats']);
     Route::put('/admin-info/social-links', [AdminProfileController::class, 'updateSocialLinks']);
     Route::get('/total-experiences', [AdminProfileController::class, 'getExperience'])->name('admin.getExperience');
+
+    //experience responsibilities
+    Route::post('/experiences/{experience}/responsibilities', [ExperienceResponsibilityController::class, 'addResponsibility']);
 });
