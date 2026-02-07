@@ -32,3 +32,4 @@ class Experience extends Model
         return $this->hasMany(ExperienceResponsibility::class);
     }
 }
+
