@@ -40,4 +40,20 @@ class ExperienceResponsibilityController extends Controller
             $experience->responsibilities()->get()
         );
     }
+
+    public function updateResponsibility(Request $request, ExperienceResponsibility $responsibility)
+    {
+        $request->validate([
+            'responsibility' => 'required|string|max:255',
+        ]);
+
+        $responsibility->update([
+            'responsibility' => $request->responsibility
+        ]);
+
+        return response()->json([
+            'message' => 'Updated successfully',
+            'data' => $responsibility
+        ]);
+    }
 }
