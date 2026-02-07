@@ -26,4 +26,9 @@ class Experience extends Model
         'start_date',
         'end_date',
     ];
+
+    public function responsibilities()
+    {
+        return $this->hasMany(ExperienceResponsibility::class);
+    }
 }
