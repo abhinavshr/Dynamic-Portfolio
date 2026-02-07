@@ -9,24 +9,48 @@ use Illuminate\Http\Request;
 
 class ExperienceResponsibilityController extends Controller
 {
+    /**
+     * Add multiple responsibilities to an experience.
+     *
+     * @param Request $request
+     * @param int $experienceId
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function addResponsibility(Request $request, $experienceId)
     {
-        $count = ExperienceResponsibility::where('experience_id', $experienceId)->count();
+        $request->validate([
+            'responsibilities' => 'required|array|min:1|max:5',
+            'responsibilities.*' => 'required|string|max:255',
+        ]);
 
-        if ($count >= 5) {
+        $existingCount = ExperienceResponsibility::where('experience_id', $experienceId)->count();
+        $newCount = count($request->responsibilities);
+
+        if (($existingCount + $newCount) > 5) {
             return response()->json([
-                'message' => 'Maximum 5 responsibilities allowed'
+                'message' => 'You can only have a maximum of 5 responsibilities per experience'
             ], 400);
         }
 
-        ExperienceResponsibility::create([
-            'experience_id' => $experienceId,
-            'responsibility' => $request->responsibility
-        ]);
+        foreach ($request->responsibilities as $item) {
+            ExperienceResponsibility::create([
+                'experience_id' => $experienceId,
+                'responsibility' => $item
+            ]);
+        }
 
-        return response()->json(['message' => 'Added successfully']);
+        return response()->json([
+            'message' => 'Responsibilities added successfully'
+        ], 201);
     }
 
+    /**
+     * Get all responsibilities with their corresponding experiences.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getAllResponsibilities()
     {
         $responsibilities = ExperienceResponsibility::with('experience')->get();
@@ -34,6 +58,12 @@ class ExperienceResponsibilityController extends Controller
         return response()->json($responsibilities);
     }
 
+    /**
+     * Get all responsibilities associated with the given experience.
+     *
+     * @param Experience $experience The experience to retrieve the responsibilities for.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getResponsibilitiesByExperience(Experience $experience)
     {
         return response()->json(
@@ -41,6 +71,14 @@ class ExperienceResponsibilityController extends Controller
         );
     }
 
+    /**
+     * Update an existing responsibility.
+     *
+     * @param Request $request The request containing the data to update the responsibility with.
+     * @param ExperienceResponsibility $responsibility The responsibility to update.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateResponsibility(Request $request, ExperienceResponsibility $responsibility)
     {
         $request->validate([
@@ -57,6 +95,13 @@ class ExperienceResponsibilityController extends Controller
         ]);
     }
 
+    /**
+     * Delete an existing responsibility.
+     *
+     * @param ExperienceResponsibility $responsibility The responsibility to delete.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteResponsibility(ExperienceResponsibility $responsibility)
     {
         $responsibility->delete();
