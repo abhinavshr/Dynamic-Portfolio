@@ -4,191 +4,235 @@ namespace App\Http\Controllers\api\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminProfile;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Class AdminProfileController
+ * @package App\Http\Controllers\api\admin
+ *
+ * Handles the profile management for admin users.
+ */
 class AdminProfileController extends Controller
 {
-
     /**
      * Return the authenticated user and its profile.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function show()
+    public function show(): JsonResponse
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return $this->errorResponse('Unauthorized', 401);
+            }
 
-        $profile = AdminProfile::firstOrCreate(
-            ['user_id' => $user->id]
-        );
+            $profile = AdminProfile::firstOrCreate(
+                ['user_id' => $user->id]
+            );
 
-        return response()->json([
-            'status' => true,
-            'user' => [
-                'name' => $user->name,
-                'email' => $user->email,
-                'profile_photo' => $user->profile_photo,
-            ],
-            'profile' => $profile
-        ]);
+            return response()->json([
+                'success' => true,
+                'user'    => [
+                    'name'          => $user->name,
+                    'email'         => $user->email,
+                    'profile_photo' => $user->profile_photo,
+                ],
+                'profile' => $profile
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Admin Profile Show Error: ' . $e->getMessage());
+            return $this->errorResponse('Failed to fetch profile info.', 500);
+        }
     }
 
     /**
-     * Store a new admin profile in storage.
+     * Store or update the complete admin profile.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'phone_number' => 'nullable|string|max:20',
-            'professional_title' => 'nullable|string|max:255',
-            'tagline' => 'nullable|string|max:255',
-            'about_me' => 'nullable|string',
-            'years_of_experience' => 'nullable|integer|min:0',
-            'projects_completed' => 'nullable|integer|min:0',
-            'happy_clients' => 'nullable|integer|min:0',
-            'technologies_used' => 'nullable|integer|min:0',
-            'github_url' => 'nullable|url',
-            'linkedin_url' => 'nullable|url',
-            'cv_url' => 'nullable|url',
-            'twitter_url' => 'nullable|url',
-        ]);
+        try {
+            $validated = $request->validate([
+                'phone_number'        => 'nullable|string|max:20',
+                'professional_title'  => 'nullable|string|max:255',
+                'tagline'             => 'nullable|string|max:255',
+                'about_me'            => 'nullable|string',
+                'years_of_experience' => 'nullable|integer|min:0',
+                'projects_completed'  => 'nullable|integer|min:0',
+                'happy_clients'       => 'nullable|integer|min:0',
+                'technologies_used'   => 'nullable|integer|min:0',
+                'github_url'          => 'nullable|url',
+                'linkedin_url'        => 'nullable|url',
+                'cv_url'              => 'nullable|url',
+                'twitter_url'         => 'nullable|url',
+            ]);
 
-        $profile = AdminProfile::updateOrCreate(
-            ['user_id' => Auth::id()],
-            $validated
-        );
+            $profile = AdminProfile::updateOrCreate(
+                ['user_id' => Auth::id()],
+                $validated
+            );
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Profile saved successfully',
-            'profile' => $profile
-        ]);
+            return $this->successResponse('Profile saved successfully', $profile);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        } catch (\Exception $e) {
+            Log::error('Admin Profile Store Error: ' . $e->getMessage());
+            return $this->errorResponse('An error occurred while saving the profile.', 500);
+        }
     }
 
     /**
      * Update the basic information for the currently logged in admin user.
      *
-     * Validates the request and updates the basic information in the database.
-     * Returns a JSON response with the status, message and the updated profile.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function updateBasicInfo(Request $request)
+    public function updateBasicInfo(Request $request): JsonResponse
     {
-        $request->validate([
-            'phone_number' => 'nullable|string|max:20',
-            'professional_title' => 'nullable|string|max:255',
-            'tagline' => 'nullable|string|max:255',
-            'about_me' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'phone_number'       => 'nullable|string|max:20',
+                'professional_title' => 'nullable|string|max:255',
+                'tagline'            => 'nullable|string|max:255',
+                'about_me'           => 'nullable|string',
+            ]);
 
-        $profile = AdminProfile::updateOrCreate(
-            ['user_id' => Auth::id()],
-            $request->only([
-                'phone_number',
-                'professional_title',
-                'tagline',
-                'about_me'
-            ])
-        );
+            $profile = AdminProfile::updateOrCreate(
+                ['user_id' => Auth::id()],
+                $validated
+            );
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Basic information updated successfully',
-            'data' => $profile
-        ]);
+            return $this->successResponse('Basic information updated successfully', $profile);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        } catch (\Exception $e) {
+            Log::error('Admin Basic Info Update Error: ' . $e->getMessage());
+            return $this->errorResponse('Failed to update basic information.', 500);
+        }
     }
 
     /**
      * Update the portfolio statistics for the currently logged in admin user.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     *
-     * @bodyParam int years_of_experience The number of years of experience the admin user has.
-     * @bodyParam int projects_completed The number of projects the admin user has completed.
-     * @bodyParam int happy_clients The number of happy clients the admin user has worked with.
-     * @bodyParam int technologies_used The number of technologies the admin user has used.
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function updatePortfolioStats(Request $request)
+    public function updatePortfolioStats(Request $request): JsonResponse
     {
-        $request->validate([
-            'years_of_experience' => 'nullable|integer|min:0',
-            'projects_completed' => 'nullable|integer|min:0',
-            'happy_clients' => 'nullable|integer|min:0',
-            'technologies_used' => 'nullable|integer|min:0',
-        ]);
+        try {
+            $validated = $request->validate([
+                'years_of_experience' => 'nullable|integer|min:0',
+                'projects_completed'  => 'nullable|integer|min:0',
+                'happy_clients'       => 'nullable|integer|min:0',
+                'technologies_used'   => 'nullable|integer|min:0',
+            ]);
 
-        $profile = AdminProfile::updateOrCreate(
-            ['user_id' => Auth::id()],
-            $request->only([
-                'years_of_experience',
-                'projects_completed',
-                'happy_clients',
-                'technologies_used'
-            ])
-        );
+            $profile = AdminProfile::updateOrCreate(
+                ['user_id' => Auth::id()],
+                $validated
+            );
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Portfolio statistics updated successfully',
-            'data' => $profile
-        ]);
+            return $this->successResponse('Portfolio statistics updated successfully', $profile);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        } catch (\Exception $e) {
+            Log::error('Admin Portfolio Stats Update Error: ' . $e->getMessage());
+            return $this->errorResponse('Failed to update portfolio statistics.', 500);
+        }
     }
 
     /**
      * Update the social links for the admin's profile.
      *
      * @param Request $request
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function updateSocialLinks(Request $request)
+    public function updateSocialLinks(Request $request): JsonResponse
     {
-        $request->validate([
-            'github_url' => 'nullable|url',
-            'linkedin_url' => 'nullable|url',
-            'cv_url' => 'nullable|url',
-            'twitter_url' => 'nullable|url',
-        ]);
+        try {
+            $validated = $request->validate([
+                'github_url'   => 'nullable|url',
+                'linkedin_url' => 'nullable|url',
+                'cv_url'       => 'nullable|url',
+                'twitter_url'  => 'nullable|url',
+            ]);
 
-        $profile = AdminProfile::updateOrCreate(
-            ['user_id' => Auth::id()],
-            $request->only([
-                'github_url',
-                'linkedin_url',
-                'cv_url',
-                'twitter_url'
-            ])
-        );
+            $profile = AdminProfile::updateOrCreate(
+                ['user_id' => Auth::id()],
+                $validated
+            );
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Social links updated successfully',
-            'data' => $profile
-        ]);
+            return $this->successResponse('Social links updated successfully', $profile);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        } catch (\Exception $e) {
+            Log::error('Admin Social Links Update Error: ' . $e->getMessage());
+            return $this->errorResponse('Failed to update social links.', 500);
+        }
     }
 
-/**
- * Get the number of years of experience for the currently logged in admin user.
- *
- * @return \Illuminate\Http\JsonResponse
- */
-    public function getExperience()
+    /**
+     * Get the number of years of experience for the currently logged in admin user.
+     *
+     * @return JsonResponse
+     */
+    public function getExperience(): JsonResponse
     {
-        $user = Auth::user();
+        try {
+            $profile = AdminProfile::where('user_id', Auth::id())->first();
 
-        $profile = AdminProfile::where('user_id', $user->id)->first();
+            return response()->json([
+                'success'             => true,
+                'message'             => 'Years of experience fetched successfully',
+                'years_of_experience' => $profile->years_of_experience ?? 0
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Admin Get Experience Error: ' . $e->getMessage());
+            return $this->errorResponse('Failed to fetch experience data.', 500);
+        }
+    }
 
+    /**
+     * Standard success response structure.
+     *
+     * @param string $message
+     * @param mixed $data
+     * @param int $code
+     * @return JsonResponse
+     */
+    protected function successResponse(string $message, mixed $data = null, int $code = 200): JsonResponse
+    {
+        $response = [
+            'success' => true,
+            'message' => $message,
+        ];
+
+        if ($data !== null) {
+            $response['profile'] = $data;
+        }
+
+        return response()->json($response, $code);
+    }
+
+    /**
+     * Standard error response structure.
+     *
+     * @param string $message
+     * @param int $code
+     * @return JsonResponse
+     */
+    protected function errorResponse(string $message, int $code = 400): JsonResponse
+    {
         return response()->json([
-            'status' => true,
-            'message' => 'Years of experience fetched successfully',
-            'years_of_experience' => $profile->years_of_experience ?? 0
-        ]);
+            'success' => false,
+            'message' => $message,
+        ], $code);
     }
 }
+
