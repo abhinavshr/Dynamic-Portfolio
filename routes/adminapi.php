@@ -28,6 +28,11 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     // Categories
     Route::get('categories', [CategoryController::class, 'index'])->name('admin.categories');
+    Route::post('categories', [CategoryController::class, 'store'])->name('admin.addcategory');
+    Route::get('categories/{id}', [CategoryController::class, 'show'])->name('admin.viewcategory');
+    Route::put('categories/{id}', [CategoryController::class, 'update'])->name('admin.updatecategory');
+    Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->name('admin.deletecategory');
+    Route::get('/total-categories', [CategoryController::class, 'totalCategories'])->name('admin.totalcategories');
 
     // Projects
     Route::post('projects', [ProjectController::class, 'addProject'])->name('admin.addproject');
