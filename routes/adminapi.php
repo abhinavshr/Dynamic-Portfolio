@@ -74,11 +74,11 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::delete('experiences/{id}', [ExperienceController::class, 'deleteExperience'])->name('admin.deleteexperience');
 
     // Certificates
-    Route::post('certificates', [CertificateController::class, 'storeCertificate'])->name('admin.addcertificate');
-    Route::get('certificates', [CertificateController::class, 'viewAllCertificates'])->name('admin.viewcertificates');
-    Route::get('certificates/{id}', [CertificateController::class, 'viewOneByOneCertificate'])->name('admin.viewcertificate');
-    Route::put('certificates/{id}', [CertificateController::class, 'updateCertificate'])->name('admin.updatecertificate');
-    Route::delete('certificates/{id}', [CertificateController::class, 'deleteCertificate'])->name('admin.deletecertificate');
+    Route::post('certificates', [CertificateController::class, 'store'])->name('admin.addcertificate');
+    Route::get('certificates', [CertificateController::class, 'index'])->name('admin.viewcertificates');
+    Route::get('certificates/{id}', [CertificateController::class, 'show'])->name('admin.viewcertificate');
+    Route::put('certificates/{id}', [CertificateController::class, 'update'])->name('admin.updatecertificate');
+    Route::delete('certificates/{id}', [CertificateController::class, 'destroy'])->name('admin.deletecertificate');
     Route::get('/total-certificates', [CertificateController::class, 'totalCertificates'])->name('admin.totalcertificates');
 
     // Soft Skills
