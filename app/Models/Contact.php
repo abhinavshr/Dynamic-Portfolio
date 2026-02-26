@@ -23,4 +23,20 @@ class Contact extends Model
     protected $casts = [
         'is_read' => 'boolean'
     ];
+
+    /**
+     * Scope a query to only include unread contacts.
+     */
+    public function scopeUnread($query)
+    {
+        return $query->where('is_read', false);
+    }
+
+    /**
+     * Scope a query to only include read contacts.
+     */
+    public function scopeRead($query)
+    {
+        return $query->where('is_read', true);
+    }
 }
